@@ -15,7 +15,7 @@ const crypto = require('crypto');
 // Create an Express application
 const app = express();
 app.use(cors());
-app.use(express.json());
+app.use(express.json()); 
 app.use(express.urlencoded({ extended: true }));
 
 // Opens a connection to the database.
@@ -68,15 +68,16 @@ app.get('/api/users', (req, res) => {
 /**
  * Get all info about specific user by binding info with prepared statements. 
  */
-app.get('/api/users', function(req, res) {
+app.get('/api/users/:userName', (req, res) => {
 
-    const { userName, password} = req.body;
+    const userName = req.params.userName;
+    const password = req.body.password;
     const hashedPwd = sha256(password);
 
-    const sql = "SELECT * FROM user WHERE username = ? AND hashedPassword = ?"
+    const sql = 'SELECT * FROM user WHERE username = ? AND hashedPassword = ?'
 
     // Create a prepared statement to select a user from the database. 
-    let stmt = app.prepare(sql);
+    let stmt = db.prepare(sql);
 
     // Bind the user input parameters to the prepared statement.
     stmt.bind(userName, hashedPwd);
@@ -113,7 +114,9 @@ app.post('/api/users', function(req, res){
     stmt.run(function (error) {
         if (error) throw error;
         res.json({ id: this.lastID });
-  });
+    });
+    // Finalize the prepared statement.
+    stmt.finalize();
 
 })
 
@@ -165,13 +168,12 @@ app.post('/api/posts', (req, res) => {
     // Bind the parameters to the prepared statement
     stmt.bind(content, user, likes, dislikes);
 
-    // Execute the prepared statement and return the result as a JSON object
-    stmt.run((error, result) => {
+    // Execute the prepared statement and return the ID of the inserted user
+    stmt.run(function (error) {
         if (error) throw error;
-        res.json({ id: result.lastID });
+        res.json({ id: this.lastID });
     });
-
-    // Finalize the prepared statement to release its resources
+    // Finalize the prepared statement.
     stmt.finalize();
 });
 
@@ -214,11 +216,11 @@ app.delete('/api/posts/:id', (req, res) => {
     const { content, user, likes, dislikes } = req.body;
   
     const sql = `
-      UPDATE posts
+      UPDATE post
       SET content = ?,
           likes = ?,
           dislikes = ?
-      WHERE id = ?
+      WHERE postId = ?
     `;
 
     // Prepare the SQL statement

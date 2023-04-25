@@ -9,8 +9,8 @@ const crypto = require('crypto');
 
 
 // Import the routes
-const postRoutes = require('./routes/posts');
-const userRoutes = require('./routes/users');
+//const postRoutes = require('./routes/posts');
+//const userRoutes = require('./routes/users');
 
 // Create an Express application
 const app = express();
@@ -64,23 +64,22 @@ app.get('/api/users', (req, res) => {
     stmt.finalize();
 });
 
+
 /**
  * Get all info about specific user by binding info with prepared statements. 
  */
-app.get('/api/users/:userName', function(req, res) {
-    const uname = req.params.userName;
-    //const name = req.params.name;
-    //const email = this.email;
-    const pwd = req.params.password;
-    const hashed_pwd = sha256(pwd);
+app.get('/api/users', function(req, res) {
+
+    const { userName, password} = req.body;
+    const hashedPwd = sha256(password);
 
     const sql = "SELECT * FROM user WHERE username = ? AND hashedPassword = ?"
 
     // Create a prepared statement to select a user from the database. 
-    let stmt = routes.prepare(sql);
+    let stmt = app.prepare(sql);
 
     // Bind the user input parameters to the prepared statement.
-    stmt.bind(uname, hashed_pwd);
+    stmt.bind(userName, hashedPwd);
 
     // Execute the prepared statement.
     stmt.get((err, row) => {
@@ -94,7 +93,9 @@ app.get('/api/users/:userName', function(req, res) {
 });
 
 
-
+/**
+ * Add a new user.
+ */
 app.post('/api/users', function(req, res){
     const { name, userName, email, password} = req.body;
     const hashedPassword = sha256(password);
@@ -133,7 +134,7 @@ function sha256(input) {
  * Define route to get all users by using prepared statements. 
  */
 app.get('/api/posts', (req, res) => {
-    // Define the SQL query to retrieve all users
+    // Define the SQL query to retrieve all posts.
     const sql = 'SELECT * FROM post';
 
     // Prepare the SQL statement
@@ -150,6 +151,98 @@ app.get('/api/posts', (req, res) => {
 });
 
 
+/**
+ * Add a new post.
+ */
+app.post('/api/posts', (req, res) => {
+    const { content, user, likes, dislikes} = req.body;
+
+    const sql = 'INSERT INTO post (content, user, likes, dislikes) VALUES (?, ?, ?, ?)';
+
+    // Prepare the SQL statement
+    const stmt = db.prepare(sql);
+
+    // Bind the parameters to the prepared statement
+    stmt.bind(content, user, likes, dislikes);
+
+    // Execute the prepared statement and return the result as a JSON object
+    stmt.run((error, result) => {
+        if (error) throw error;
+        res.json({ id: result.lastID });
+    });
+
+    // Finalize the prepared statement to release its resources
+    stmt.finalize();
+});
+
+
+
+/**
+ * Define route to delete a post by ID using prepared statements.
+ */
+app.delete('/api/posts/:id', (req, res) => {
+    const postId = req.params.id;
+  
+    // Define the SQL query to delete the post with the specified ID
+    const sql = 'DELETE FROM post WHERE postId = ?';
+  
+    // Prepare the SQL statement
+    const stmt = db.prepare(sql);
+  
+    // Bind the post ID parameter to the prepared statement
+    stmt.bind(postId);
+  
+    // Execute the prepared statement
+    stmt.run( (error) => {
+      if (error) {
+        console.error(error.message);
+        res.status(500).send('Internal server error');
+      } else {
+        res.status(204).send();
+      }
+    });
+  
+    // Finalize the prepared statement to release its resources
+    stmt.finalize();
+  });
+
+  /**
+   * Update a post (edit, likes, or dislikes)
+   */
+  app.patch('/api/posts/:postId', (req, res) => {
+    const postId = req.params.postId;
+    const { content, user, likes, dislikes } = req.body;
+  
+    const sql = `
+      UPDATE posts
+      SET content = ?,
+          likes = ?,
+          dislikes = ?
+      WHERE id = ?
+    `;
+
+    // Prepare the SQL statement
+    const stmt = db.prepare(sql);
+
+    // Bind the post ID parameter to the prepared statement
+    stmt.bind(content, likes, dislikes, postId);
+  
+    // Execute the prepared statement
+    stmt.run( (error) => {
+        if (error) {
+          console.error(error.message);
+          res.status(500).send('Internal server error');
+        } else {
+          res.status(204).send();
+        }
+      });
+    
+      // Finalize the prepared statement to release its resources
+      stmt.finalize();
+  });
+  
+
+  /*
 app.post('/api/posts', function(req, res){
     const { user, content } = req.body;
 
@@ -169,7 +262,7 @@ app.post('/api/posts', function(req, res){
         res.json({ id: this.lastID });
   });
 
-})
+})*/
 
 
 // // Closes the connection to the database.

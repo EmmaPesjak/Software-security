@@ -24,7 +24,7 @@ GET {{url}}/users/Test
 
 ###############################################
 
-// Test: Get a restaurant that does not exists
+// Test: Get a user that does not exists
 // Expected HTTP response status code: 404
 GET {{url}}/users/fail
 
@@ -36,29 +36,30 @@ POST {{url}}/users HTTP/1.1
 content-type: application/json
 
 {
-    "userName": "Test",
-    "name": "Test hej",
-    "email": "test@hej.com",
-    "password": "test"
+    "userName": "mina",
+    "name": "Mina",
+    "email": "mina@hej.com",
+    "password": "mina123"
 }
 
 ###############################################
 
 // Test: Delete a post.
 // Expected HTTP response status code: 200.
-DELETE {{url}}/posts/content
+DELETE {{url}}/posts/1
 
 ###############################################
 
 
 // Test: Add a new post.
 // Expected HTTP response status code: 200.
-POST  {{url}}/posts HTTP/1.1
+POST {{url}}/posts HTTP/1.1
 content-type: application/json
-
 {
    "content": "Test test",
-   "user": 1
+   "user": 1,
+   "likes": 15,
+   "dislikes": 3
 }
 
 ###############################################

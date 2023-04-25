@@ -1,0 +1,40 @@
+.search_container {
+    width: 50%;
+    text-align: left;
+}
+
+.forum_post {
+    background-color: rgba(255, 255, 255, 0.705);
+    border-radius: .25em;
+    color: rgb(2, 45, 40);
+    margin-top: 24px;
+    padding: 8px;
+    font-size: .8em;
+    text-align: left;
+}
+
+.post_text {
+    margin-left: .2em;
+}
+
+.like, .dislike {
+    background-color: transparent;
+    border: none;
+}
+
+.like:hover, .dislike:hover {
+    background-color: transparent;
+    cursor: pointer;
+    border: none;
+}
+
+.delete {
+    margin-top: .8em;
+    margin-bottom: .8em;
+}
+
+.post_btns {
+    display: flex;
+    flex-direction: row;
+    margin-top: .2em;
+}

@@ -1,0 +1,20 @@
+<main>
+    <div class="search_container">
+        <label>Search: <input onkeyup="onSearchTextChanged()" type="text" id="search" placeholder="username or keyword..."></label>
+    </div>
+
+    <!-- Här behöver man ju någon connection med backend för att loopa över databasen och lägga in alla posts, 
+        man ska ju inte kunna deleta vad som helst heller -->
+    <div class="forum_post">
+        <div class="post_name"><b>Emma</b></div>
+        <div class="post_username">@Emma123</div>
+        <div class="post_text">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum dignissim, lorem sed faucibus consectetur, dolor libero blandit erat, venenatis congue quam enim sit amet lacus. Proin at semper libero, sed interdum metus. Mauris semper tellus pharetra orci euismod pretium. Etiam at libero ornare sem congue varius a eget arcu. Duis at feugiat sapien. Donec sapien tortor, gravida sit amet eleifend a, blandit eget orci.</div>
+        <div class="post_btns">
+            <button type="button" class="like"><img id="thumb_up" src="assets/img/thumb_up.png" alt="thumbs up button"></button>
+            <p>234</p>
+            <button type="button" class="dislike"><img id="thumb_down" src="assets/img/thumb_down.png" alt="thumbs down button"></button>
+            <p>3</p>
+            <button type="button" class="delete">Delete</button>
+        </div>
+    </div>
+</main>

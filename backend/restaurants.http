@@ -5,64 +5,55 @@
 
 ###############################################
 
-// Test: Get all neighborhoods.
+// Test: Get all users.
 // Expected HTTP response status code: 200.
-GET {{url}}/neighborhoods
+GET {{url}}/users
 
 ###############################################
 
 
-// Test: Get all restaurants.
+// Test: Get all posts.
 // Expected HTTP response status code: 200.
-GET {{url}}/restaurants
+GET {{url}}/posts
 
 ###############################################
 
-// Test: Get a restaurant that exists.
+// Test: Get a user that exists.
 // Expected HTTP response status code: 200.
-GET {{url}}/restaurants/White Lotus
+GET {{url}}/users/ebba
 
 ###############################################
 
 // Test: Get a restaurant that does not exists
-// Expected HTTP response status code: 200
-GET {{url}}/restaurants/fail
+// Expected HTTP response status code: 404
+GET {{url}}/users/fail
 
 ###############################################
 
-// Test: Post (add) a restaurant.
+// Test: Post (add) a user.
 // Expected HTTP response status code: 201.
-POST {{url}}/restaurants HTTP/1.1
+POST {{url}}/users HTTP/1.1
 content-type: application/json
 
 {
-    "name": "Test",
-    "rating": 4.8,
-    "address": "4883 Shinn Street",
-    "neighborhood": "Brooklyn",
-    "owner": "Dianne Little",
-    "cuisine": "Moroccan",
-    "headChef": "Christine Carlson",
-    "priceRange": "$$$",
-    "michelinStars": 3,
-    "guestsPerYear": 56489,
-    "phone": "202-555-0181",
-    "noOfReviews": 45,
-    "latestReview": "I stumbled on this undiscovered gem right in our neighboorhood. The waiter did an excellent job. The decor was unique and incredible. The experience was heavenly as I was served a meal fit for God himself. Overall experience: 5 stars."
+    "userName": "Test",
+    "name": "Test hej",
+    "email": "test@hej.com",
+    "password": "test"
 }
 
 ###############################################
 
-// Test: Delete a restaurant.
+// Test: Delete a post.
 // Expected HTTP response status code: 200.
-DELETE {{url}}/restaurants/Test
+DELETE {{url}}/posts/content
 
 ###############################################
 
 
-// Test: Put (update) a restaurant.
+// Test: Put (update) a post.
 // Expected HTTP response status code: 200.
-PUT {{url}}/restaurants/Test HTTP/1.1
+PUT {{url}}/posts/content HTTP/1.1
 content-type: application/json
 
 {

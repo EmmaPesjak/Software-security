@@ -7,6 +7,7 @@ require('dotenv').config();
 
 // Import the routes
 const postRoutes = require('./routes/posts');
+//const userRoutes = require('./routes/users');
 
 // Create an Express application
 const app = express();
@@ -33,6 +34,28 @@ app.listen(port, function() {
 
 // Enable the routes in app
 app.use('/', postRoutes);
+//app.use('/', userRoutes);
+
+/**
+ * Define route to get all users by using prepared statements. 
+ */
+app.get('/api/users', (req, res) => {
+    // Define the SQL query to retrieve all users
+    const sql = 'SELECT * FROM user';
+
+    // Prepare the SQL statement
+    const stmt = db.prepare(sql);
+
+    // Execute the prepared statement and return the result as a JSON array
+    stmt.all([], (error, req) => {
+        if (error) throw error;
+        res.json(req);
+    });
+
+    // Finalize the prepared statement to release its resources
+    stmt.finalize();
+});
+
 
 // // Closes the connection to the database.
 // db.close((err) => {

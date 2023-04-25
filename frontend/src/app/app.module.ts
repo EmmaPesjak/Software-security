@@ -9,6 +9,7 @@ import { RegisterComponent } from './register/register.component';
 import { ForumComponent } from './forum/forum.component';
 import { HomeComponent } from './home/home.component';
 import { AddPostComponent } from './add-post/add-post.component';
+import { SearchComponent } from './search/search.component';
 
 @NgModule({
   declarations: [
@@ -16,7 +17,8 @@ import { AddPostComponent } from './add-post/add-post.component';
     RegisterComponent,
     ForumComponent,
     HomeComponent,
-    AddPostComponent
+    AddPostComponent,
+    SearchComponent
   ],
   imports: [
     BrowserModule,

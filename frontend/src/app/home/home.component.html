@@ -7,7 +7,9 @@
           <label for="psw"><b>Password</b></label>
           <input type="password" placeholder="Enter Password" name="psw" required>
       
-          <button type="submit">Log in</button>
+          <!-- Just nu länkar denna bara till forumet!!! -->
+          <a routerLink="/forum" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}"><button type="submit" id="login">Log in</button></a>
+
           <a routerLink="/register" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}"><button type="button" id="register">Register</button></a>
         </div>
       </form>

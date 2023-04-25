@@ -1,20 +1,34 @@
 <main>
-    <div class="search_container">
-        <label>Search: <input onkeyup="onSearchTextChanged()" type="text" id="search" placeholder="username or keyword..."></label>
+    <div class="top_container">
+        <app-search (searchTextChanged)="onSearchTextChanged($event)"></app-search>
+    
+        <!-- Just nu länkar denna bara tillbaka till index page!!! -->
+        <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}"><button type="button" id="logout">Log out</button></a>
+        
+        <button type="button" (click)="showAdd()">Add post</button>
     </div>
 
-    <!-- Här behöver man ju någon connection med backend för att loopa över databasen och lägga in alla posts, 
-        man ska ju inte kunna deleta vad som helst heller -->
-    <div class="forum_post">
-        <div class="post_name"><b>Emma</b></div>
-        <div class="post_username">@Emma123</div>
-        <div class="post_text">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum dignissim, lorem sed faucibus consectetur, dolor libero blandit erat, venenatis congue quam enim sit amet lacus. Proin at semper libero, sed interdum metus. Mauris semper tellus pharetra orci euismod pretium. Etiam at libero ornare sem congue varius a eget arcu. Duis at feugiat sapien. Donec sapien tortor, gravida sit amet eleifend a, blandit eget orci.</div>
-        <div class="post_btns">
-            <button type="button" class="like"><img id="thumb_up" src="assets/img/thumb_up.png" alt="thumbs up button"></button>
-            <p>234</p>
-            <button type="button" class="dislike"><img id="thumb_down" src="assets/img/thumb_down.png" alt="thumbs down button"></button>
-            <p>3</p>
-            <button type="button" class="delete">Delete</button>
+    <!-- Displays a child component to add a forum post if the boolean is true. -->
+    <div class="add_box" *ngIf="showAddBox">
+        <app-add-post></app-add-post>
+    </div> 
+
+    
+    <ng-container *ngFor="let post of posts">
+        <div class="forum_post">
+            <!-- SKA DET VARA TOLOWERCASE? -->
+            <div *ngIf="searchText === '' || post.content.toLowerCase().includes(searchText.toLowerCase()) || post.user.toLowerCase().includes(searchText.toLowerCase())">
+                <div class="post_user"><b>{{ post.user }}</b></div>
+                <div class="post_content">{{ post.content }}</div>
+                <div class="post_btns">
+                    <!-- HÄR GÖR INGA KNAPPAR RÄTT!!! -->
+                    <button type="button" class="like"><img id="thumb_up" src="assets/img/thumb_up.png" alt="thumbs up button"></button>
+                    <p>{{ post.likes }}</p>
+                    <button type="button" class="dislike"><img id="thumb_down" src="assets/img/thumb_down.png" alt="thumbs down button"></button>
+                    <p>{{ post.dislikes }}</p>
+                    <button type="button" class="delete">Delete</button><!-- HÄR FÅR MAN LÄGGA TILL EN *ngIf username!!! -->
+                </div>
+            </div>
         </div>
-    </div>
+    </ng-container>
 </main>

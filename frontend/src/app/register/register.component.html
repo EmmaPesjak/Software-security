@@ -1,24 +1,30 @@
 <main>
-    <form>
+    <form ngNativeValidate class="add-user-form" id="add-user-form" (ngSubmit)="addUser()">
         <div class="register_container">
             <p>Please fill in this form to create an account.</p>
 
             <label for="email"><b>Email</b></label>
-            <input type="text" placeholder="Enter Email" name="email" id="email" required>
+            <input type="text" class="form-field" [(ngModel)]="email" placeholder="Enter Email" name="email" id="email" required>
 
             <label for="name"><b>Name</b></label>
-            <input type="text" placeholder="Enter Name" name="name" id="name" required>
+            <input type="text" class="form-field" [(ngModel)]="name" placeholder="Enter Name" name="name" id="name" required>
       
             <label for="username"><b>Username</b></label>
-            <input type="text" placeholder="Enter Username" name="username" id="username" required>
+            <input type="text" class="form-field" [(ngModel)]="userName" placeholder="Enter Username" name="username" id="username" required>
       
             <label for="psw"><b>Password</b></label>
-            <input type="password" placeholder="Enter Password" name="psw" id="psw" required>
+            <input type="password" class="form-field" [(ngModel)]="password" placeholder="Enter Password" name="psw" id="psw" required>
       
             <label for="psw-repeat"><b>Repeat Password</b></label>
-            <input type="password" placeholder="Repeat Password" name="psw-repeat" id="psw-repeat" required>
+            <input type="password" class="form-field" [(ngModel)]="passwordRepeat" placeholder="Repeat Password" name="psw-repeat" id="psw-repeat" required>
       
-            <a routerLink="/forum" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}"><button type="submit" id="register">Register</button></a>
+
+            <!-- Call the addUser() method when the user presses the button. -->
+            <button type="submit" for="add-user-form" value="Add">Register</button>
+
+            <!-- Place for success/error message to be displayed -->
+            <p *ngIf="message">{{ message }}</p>
+
         </div>
       
         <div>

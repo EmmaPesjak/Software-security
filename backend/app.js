@@ -111,9 +111,9 @@ app.post('/api/users', function(req, res){
     stmt.bind(userName, hashedPassword, name, email);
 
     // Execute the prepared statement and return the ID of the inserted user
-    stmt.run(function (error) {
+    stmt.run(function (error, row) {
         if (error) throw error;
-        res.json({ id: this.lastID });
+        res.json(row);
     });
     // Finalize the prepared statement.
     stmt.finalize();
@@ -200,7 +200,7 @@ app.delete('/api/posts/:id', (req, res) => {
         console.error(error.message);
         res.status(500).send('Internal server error');
       } else {
-        res.status(204).send();
+        res.status(204).send({id: this.lastID});
       }
     });
   
@@ -235,7 +235,7 @@ app.delete('/api/posts/:id', (req, res) => {
           console.error(error.message);
           res.status(500).send('Internal server error');
         } else {
-          res.status(204).send();
+          res.status(204).send({id: this.lastID});
         }
       });
     
@@ -243,29 +243,6 @@ app.delete('/api/posts/:id', (req, res) => {
       stmt.finalize();
   });
   
-
-  /*
-app.post('/api/posts', function(req, res){
-    const { user, content } = req.body;
-
-    // ADD COLUMNS TO DB: LIKES & DISLIKES
-    // Define the SQL query to insert a new user
-    const sql = 'INSERT INTO post (user, content) VALUES (?, ?)';
-
-    // Prepare the SQL statement
-    const stmt = db.prepare(sql);
-
-    // Bind the post data to the prepared statement
-    stmt.bind(user, content);
-
-    // Execute the prepared statement and return the ID of the inserted post
-    stmt.run(function (error) {
-        if (error) throw error;
-        res.json({ id: this.lastID });
-  });
-
-})*/
-
 
 // // Closes the connection to the database.
 // db.close((err) => {

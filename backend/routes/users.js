@@ -1,7 +1,6 @@
 const routes = require('express').Router();
 const crypto = require('crypto');
 
-
 /**
  * Define route to get all users by using prepared statements. 
  */
@@ -26,20 +25,19 @@ routes.get('/api/users', (req, res) => {
 /**
  * Get all info about specific user by binding info with prepared statements. 
  */
-routes.get('/api/users/:userName', function(req, res) {
-    const uname = req.params.userName;
-    //const name = req.params.name;
-    //const email = this.email;
-    const pwd = this.password;
-    const hashed_pwd = sha256(pwd);
+routes.get('/api/users/:userName', (req, res) => {
 
-    const sql = "SELECT * FROM user WHERE username = ? AND hashedPassword = ?"
+    const userName = req.params.userName;
+    const password = req.body.password;
+    const hashedPwd = sha256(password);
+
+    const sql = 'SELECT * FROM user WHERE username = ? AND hashedPassword = ?'
 
     // Create a prepared statement to select a user from the database. 
-    let stmt = routes.prepare(sql);
+    let stmt = db.prepare(sql);
 
     // Bind the user input parameters to the prepared statement.
-    stmt.bind(uname, hashed_pwd);
+    stmt.bind(userName, hashedPwd);
 
     // Execute the prepared statement.
     stmt.get((err, row) => {
@@ -52,6 +50,10 @@ routes.get('/api/users/:userName', function(req, res) {
 
 });
 
+
+/**
+ * Add a new user.
+ */
 routes.post('/api/users', function(req, res){
     const { name, userName, email, password} = req.body;
     const hashedPassword = sha256(password);
@@ -66,18 +68,21 @@ routes.post('/api/users', function(req, res){
     stmt.bind(userName, hashedPassword, name, email);
 
     // Execute the prepared statement and return the ID of the inserted user
-    stmt.run(function (error) {
+    stmt.run(function (error, row) {
         if (error) throw error;
-        res.json({ id: this.lastID });
-  });
+        res.json(row);
+    });
+    // Finalize the prepared statement.
+    stmt.finalize();
 
 })
 
+
 // Get hash-password.
 function sha256(input) {
-  const hash = crypto.createHash('sha256');
-  hash.update(input);
-  return hash.digest('hex');
+    const hash = crypto.createHash('sha256');
+    hash.update(input);
+    return hash.digest('hex');
 }
 
 module.exports = routes;

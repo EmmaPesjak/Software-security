@@ -20,7 +20,7 @@ GET {{url}}/posts
 
 // Test: Get a user that exists.
 // Expected HTTP response status code: 200.
-GET {{url}}/users/ebba
+GET {{url}}/users/Test
 
 ###############################################
 

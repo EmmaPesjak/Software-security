@@ -36,12 +36,12 @@ app.listen(port, function() {
 });
 
 // Enable the routes in app
-app.use('/', postRoutes);
-app.use('/', userRoutes);
+//app.use('/', postRoutes);
+//app.use('/', userRoutes);
 
 
 
-//////////// USERS 
+////////////////////////// USERS ////////////////////////// 
 
 
 /**
@@ -67,7 +67,7 @@ app.get('/api/users', (req, res) => {
 /**
  * Get all info about specific user by binding info with prepared statements. 
  */
-app.get('/api/users/:user', function(req, res) {
+app.get('/api/users/:userName', function(req, res) {
     const uname = req.params.userName;
     //const name = req.params.name;
     //const email = this.email;
@@ -122,7 +122,54 @@ function sha256(input) {
     const hash = crypto.createHash('sha256');
     hash.update(input);
     return hash.digest('hex');
-  }
+}
+
+
+
+////////////////////////// POSTS ////////////////////////// 
+
+
+/**
+ * Define route to get all users by using prepared statements. 
+ */
+app.get('/api/posts', (req, res) => {
+    // Define the SQL query to retrieve all users
+    const sql = 'SELECT * FROM post';
+
+    // Prepare the SQL statement
+    const stmt = db.prepare(sql);
+
+    // Execute the prepared statement and return the result as a JSON array
+    stmt.all([],(error, req) => {
+        if (error) throw error;
+        res.json(req);
+    });
+
+    // Finalize the prepared statement to release its resources
+    stmt.finalize();
+});
+
+
+app.post('/api/posts', function(req, res){
+    const { user, content } = req.body;
+
+    // ADD COLUMNS TO DB: LIKES & DISLIKES
+    // Define the SQL query to insert a new user
+    const sql = 'INSERT INTO post (user, content) VALUES (?, ?)';
+
+    // Prepare the SQL statement
+    const stmt = db.prepare(sql);
+
+    // Bind the post data to the prepared statement
+    stmt.bind(user, content);
+
+    // Execute the prepared statement and return the ID of the inserted post
+    stmt.run(function (error) {
+        if (error) throw error;
+        res.json({ id: this.lastID });
+  });
+
+})
 
 
 // // Closes the connection to the database.

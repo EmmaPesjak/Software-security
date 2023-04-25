@@ -1,7 +1,6 @@
 const routes = require('express').Router();
 const crypto = require('crypto');
 
-module.exports = (db) => { 
 
 /**
  * Define route to get all users by using prepared statements. 
@@ -27,7 +26,7 @@ routes.get('/api/users', (req, res) => {
 /**
  * Get all info about specific user by binding info with prepared statements. 
  */
-routes.get('/api/users/:user', function(req, res) {
+routes.get('/api/users/:userName', function(req, res) {
     const uname = req.params.userName;
     //const name = req.params.name;
     //const email = this.email;
@@ -79,8 +78,6 @@ function sha256(input) {
   const hash = crypto.createHash('sha256');
   hash.update(input);
   return hash.digest('hex');
-}
-
 }
 
 module.exports = routes;

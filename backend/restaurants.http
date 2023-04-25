@@ -1,0 +1,82 @@
+@server = http://localhost
+@port = 3000
+@resource = api
+@url = {{server}}:{{port}}/{{resource}}
+
+###############################################
+
+// Test: Get all neighborhoods.
+// Expected HTTP response status code: 200.
+GET {{url}}/neighborhoods
+
+###############################################
+
+
+// Test: Get all restaurants.
+// Expected HTTP response status code: 200.
+GET {{url}}/restaurants
+
+###############################################
+
+// Test: Get a restaurant that exists.
+// Expected HTTP response status code: 200.
+GET {{url}}/restaurants/White Lotus
+
+###############################################
+
+// Test: Get a restaurant that does not exists
+// Expected HTTP response status code: 200
+GET {{url}}/restaurants/fail
+
+###############################################
+
+// Test: Post (add) a restaurant.
+// Expected HTTP response status code: 201.
+POST {{url}}/restaurants HTTP/1.1
+content-type: application/json
+
+{
+    "name": "Test",
+    "rating": 4.8,
+    "address": "4883 Shinn Street",
+    "neighborhood": "Brooklyn",
+    "owner": "Dianne Little",
+    "cuisine": "Moroccan",
+    "headChef": "Christine Carlson",
+    "priceRange": "$$$",
+    "michelinStars": 3,
+    "guestsPerYear": 56489,
+    "phone": "202-555-0181",
+    "noOfReviews": 45,
+    "latestReview": "I stumbled on this undiscovered gem right in our neighboorhood. The waiter did an excellent job. The decor was unique and incredible. The experience was heavenly as I was served a meal fit for God himself. Overall experience: 5 stars."
+}
+
+###############################################
+
+// Test: Delete a restaurant.
+// Expected HTTP response status code: 200.
+DELETE {{url}}/restaurants/Test
+
+###############################################
+
+
+// Test: Put (update) a restaurant.
+// Expected HTTP response status code: 200.
+PUT {{url}}/restaurants/Test HTTP/1.1
+content-type: application/json
+
+{
+   "michelinStars": 1
+}
+
+###############################################
+
+// Test: Get neighborhood with all restaurants.
+// Expected HTTP response status code: 200.
+GET {{url}}/neighborhoods/Brooklyn
+
+###############################################
+
+// Test: Get all neighborhoods with all restaurants.
+// Expected HTTP  response status code: 200.
+GET {{url}}/all

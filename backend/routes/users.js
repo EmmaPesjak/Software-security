@@ -1,6 +1,8 @@
 const routes = require('express').Router();
 const crypto = require('crypto');
 
+module.exports = (db) => { 
+
 /**
  * Define route to get all users by using prepared statements. 
  */
@@ -77,6 +79,8 @@ function sha256(input) {
   const hash = crypto.createHash('sha256');
   hash.update(input);
   return hash.digest('hex');
+}
+
 }
 
 module.exports = routes;

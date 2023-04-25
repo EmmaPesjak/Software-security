@@ -1,0 +1,23 @@
+<!-- 
+  Create a form for adding posts. ngNativeValidate ensures validation of required attributes. 
+  Bind values with ngModel.
+-->
+<form ngNativeValidate class="add-post-form" id="add-post-form" (ngSubmit)="addPost()">
+   
+    <h3>Add post</h3>
+
+
+    <!-- HÄR BLIR DET JU KNÄPPT FÖR JAG INTE HAR USER OCH POSTID OCH SÅNT -->
+
+
+    <label>Content:
+      <input class="form-field" [(ngModel)]="content" name="content" required/>
+    </label>&nbsp;<br>
+  
+    <!-- Call the addPost() method when the user presses the button. -->
+    <button type="submit" for="add-post-form" value="Add">Add</button>
+
+    <!-- Place for success/error message to be displayed -->
+    <p *ngIf="message">{{ message }}</p>
+  
+</form>

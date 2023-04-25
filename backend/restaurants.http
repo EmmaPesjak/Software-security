@@ -51,13 +51,14 @@ DELETE {{url}}/posts/content
 ###############################################
 
 
-// Test: Put (update) a post.
+// Test: Add a new post.
 // Expected HTTP response status code: 200.
-PUT {{url}}/posts/content HTTP/1.1
+POST  {{url}}/posts HTTP/1.1
 content-type: application/json
 
 {
-   "michelinStars": 1
+   "content": "Test test",
+   "user": 1
 }
 
 ###############################################

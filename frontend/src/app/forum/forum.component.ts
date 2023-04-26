@@ -47,10 +47,8 @@ export class ForumComponent {
   }
 
   /**
-   * Method for the details buttons, passes the restaurant to the child 
-   * component restaurant-info in the HTML which displays all details of the restaurant. 
-   * The showInfo boolean is set to true to make the child visible.
-   * @param restaurant is the reataurant to be displayed.
+   * Method for showing the add post component.
+   * The showAddBox boolean is set to true to make the child visible.
    */
   showAdd() {
     this.showAddBox = true;

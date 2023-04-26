@@ -14,7 +14,7 @@ import { User } from './user';
  */
 export class BackendService {
 
-  readonly API_URL = "url"; // TODO: Correct url here!!!
+  readonly API_URL = "http://localhost:3000"; // TODO: Correct url here!!!
 
   constructor(private http: HttpClient) { }
 
@@ -67,7 +67,6 @@ export class BackendService {
   addUser(user: User) {
     const endpoint = this.API_URL + '/api/users';
     const body = {
-      userId: user.userId,
       name: user.name,
       userName: user.userName,
       email: user.email,

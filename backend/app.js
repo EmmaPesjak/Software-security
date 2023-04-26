@@ -15,7 +15,7 @@ const crypto = require('crypto');
 // Create an Express application
 const app = express();
 app.use(cors());
-app.use(express.json()); 
+app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Opens a connection to the database.
@@ -23,8 +23,8 @@ const db = new sqlite3.Database('./guestbook.db', (err) => {
     if (err) return console.error(err.message);
     console.log('Connected to the in-memory SQlite database.');
 });
-// The DB consists of two tables: user(userId, username, hashedPassword, name, email) and post(postId, content, user).
-// Note that the DB doesn't contain any data at this time.
+// The DB consists of four tables: user(userId, username, hashedPassword, name, email), post(postId, content, user) and
+// like(post, user) and dislike(post, user).
 // Tutorial on how to query data from the DB: https://www.sqlitetutorial.net/sqlite-nodejs/query/.
 
 // Define the port the server will accept connections on
@@ -41,11 +41,11 @@ app.listen(port, function() {
 
 
 
-////////////////////////// USERS ////////////////////////// 
+////////////////////////// USERS //////////////////////////
 
 
 /**
- * Define route to get all users by using prepared statements. 
+ * Define route to get all users by using prepared statements.
  */
 app.get('/api/users', (req, res) => {
     // Define the SQL query to retrieve all users
@@ -66,7 +66,7 @@ app.get('/api/users', (req, res) => {
 
 
 /**
- * Get all info about specific user by binding info with prepared statements. 
+ * Get all info about specific user by binding info with prepared statements.
  */
 app.get('/api/users/:userName', (req, res) => {
 
@@ -76,7 +76,7 @@ app.get('/api/users/:userName', (req, res) => {
 
     const sql = 'SELECT * FROM user WHERE username = ? AND hashedPassword = ?'
 
-    // Create a prepared statement to select a user from the database. 
+    // Create a prepared statement to select a user from the database.
     let stmt = db.prepare(sql);
 
     // Bind the user input parameters to the prepared statement.
@@ -87,7 +87,7 @@ app.get('/api/users/:userName', (req, res) => {
         if (err) throw err;
         res.json(row);
     });
-    
+
     // Finalize the prepared statement.
     stmt.finalize();
 
@@ -130,11 +130,11 @@ function sha256(input) {
 
 
 
-////////////////////////// POSTS ////////////////////////// 
+////////////////////////// POSTS //////////////////////////
 
 
 /**
- * Define route to get all users by using prepared statements. 
+ * Define route to get all users by using prepared statements.
  */
 app.get('/api/posts', (req, res) => {
     // Define the SQL query to retrieve all posts.
@@ -184,16 +184,16 @@ app.post('/api/posts', (req, res) => {
  */
 app.delete('/api/posts/:id', (req, res) => {
     const postId = req.params.id;
-  
+
     // Define the SQL query to delete the post with the specified ID
     const sql = 'DELETE FROM post WHERE postId = ?';
-  
+
     // Prepare the SQL statement
     const stmt = db.prepare(sql);
-  
+
     // Bind the post ID parameter to the prepared statement
     stmt.bind(postId);
-  
+
     // Execute the prepared statement
     stmt.run( (error) => {
       if (error) {
@@ -203,7 +203,7 @@ app.delete('/api/posts/:id', (req, res) => {
         res.status(204).send({id: this.lastID});
       }
     });
-  
+
     // Finalize the prepared statement to release its resources
     stmt.finalize();
   });
@@ -214,7 +214,7 @@ app.delete('/api/posts/:id', (req, res) => {
   app.patch('/api/posts/:postId', (req, res) => {
     const postId = req.params.postId;
     const { content, user, likes, dislikes } = req.body;
-  
+
     const sql = `
       UPDATE post
       SET content = ?,
@@ -228,7 +228,7 @@ app.delete('/api/posts/:id', (req, res) => {
 
     // Bind the post ID parameter to the prepared statement
     stmt.bind(content, likes, dislikes, postId);
-  
+
     // Execute the prepared statement
     stmt.run( (error) => {
         if (error) {
@@ -238,11 +238,11 @@ app.delete('/api/posts/:id', (req, res) => {
           res.status(204).send({id: this.lastID});
         }
       });
-    
+
       // Finalize the prepared statement to release its resources
       stmt.finalize();
   });
-  
+
 
 // // Closes the connection to the database.
 // db.close((err) => {

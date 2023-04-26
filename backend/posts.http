@@ -134,7 +134,7 @@ content-type: application/json
 
 // Test: Update (PATCH) a post.
 // Expected HTTP  response status code: 200.
-PATCH  {{url}}/posts/10 HTTP/1.1
+PATCH  {{url}}/posts/12 HTTP/1.1
 content-type: application/json
 
 {
@@ -157,7 +157,7 @@ content-type: application/json
 
 // Test: Delete a post that exists.
 // Expected HTTP response status code: 204.
-DELETE {{url}}/posts/37
+DELETE {{url}}/posts/12
 
 ###############################################
 

@@ -1,89 +1,86 @@
-const routes = require('express').Router();
-const crypto = require('crypto');
+module.exports = function(db, app, crypto) {
+    //* GET
+    /**
+     * Retrieves all users.
+     */
+    app.get('/api/users', (req, res) => {
+        // The SQL query to retrieve all users.
+        const sql = 'SELECT * FROM user';
 
-/**
- * Define route to get all users by using prepared statements. 
- */
-routes.get('/api/users', (req, res) => {
-    // Define the SQL query to retrieve all users
-    const sql = 'SELECT * FROM user';
+        // Prepares the SQL statement.
+        const stmt = db.prepare(sql);
 
-    // Prepare the SQL statement
-    const stmt = db.prepare(sql);
+        // Executes the prepared statement and returns the result.
+        stmt.all([], (error, req) => {
+            if (error) throw error;
+            res.json(req);
+        });
 
-    // Execute the prepared statement and return the result as a JSON array
-    stmt.all([], (error, req) => {
-        if (error) throw error;
-        res.json(req);
+        // Finalizes the prepared statement to release its resources.
+        stmt.finalize();
     });
 
-    // Finalize the prepared statement to release its resources
-    stmt.finalize();
-});
+    //* GET
+    /**
+     * Retrieves the specified user.
+     */
+    app.get('/api/users/:userName', (req, res) => {
+        const userName = req.params.userName,
+        password = req.body.password,
+        hashedPassword = sha256(password);
 
+        // The SQL query to retrieve the specified user.
+        const sql = 'SELECT * FROM user WHERE username = ? AND hashedPassword = ?'
 
-/**
- * Get all info about specific user by binding info with prepared statements. 
- */
-routes.get('/api/users/:userName', (req, res) => {
+        // Prepares the SQL statement.
+        let stmt = db.prepare(sql);
 
-    const userName = req.params.userName;
-    const password = req.body.password;
-    const hashedPwd = sha256(password);
+        // Binds the parameters to the prepared statement.
+        stmt.bind(userName, hashedPassword);
 
-    const sql = 'SELECT * FROM user WHERE username = ? AND hashedPassword = ?'
+        // Executes the prepared statement and returns the result.
+        stmt.get((err, row) => {
+            if (err) throw err;
+            res.json(row);
+        });
 
-    // Create a prepared statement to select a user from the database. 
-    let stmt = db.prepare(sql);
-
-    // Bind the user input parameters to the prepared statement.
-    stmt.bind(userName, hashedPwd);
-
-    // Execute the prepared statement.
-    stmt.get((err, row) => {
-        if (err) throw err;
-        res.json(row);
+        // Finalizes the prepared statement to release its resources.
+        stmt.finalize();
     });
-    
-    // Finalize the prepared statement.
-    stmt.finalize();
 
-});
+    /**
+     * Calculates hash.
+     */
+    function sha256(input) {
+        const hash = crypto.createHash('sha256');
+        hash.update(input);
+        return hash.digest('hex');
+    }
 
+    //* POST
+    /**
+     * Creates a user.
+     */
+    app.post('/api/users', function (req, res) {
+        const {name, userName, email, password} = req.body,
+        hashedPassword = sha256(password);
 
-/**
- * Add a new user.
- */
-routes.post('/api/users', function(req, res){
-    const { name, userName, email, password} = req.body;
-    const hashedPassword = sha256(password);
+        // The SQL query to create a user.
+        const sql = 'INSERT INTO user(username, hashedPassword, name, email) VALUES (?, ?, ?, ?)';
 
-    // Define the SQL query to insert a new user
-    const sql = 'INSERT INTO user (username, hashedPassword, name, email) VALUES (?, ?, ?, ?)';
+        // Prepares the SQL statement.
+        const stmt = db.prepare(sql);
 
-    // Prepare the SQL statement
-    const stmt = db.prepare(sql);
+        // Binds the parameters to the prepared statement.
+        stmt.bind(userName, hashedPassword, name, email);
 
-    // Bind the user data to the prepared statement
-    stmt.bind(userName, hashedPassword, name, email);
+        // Execute the prepared statement and returns the result.
+        stmt.run(function (error) {
+            if (error) throw error;
+            res.json({id: this.lastID});
+        });
 
-    // Execute the prepared statement and return the ID of the inserted user
-    stmt.run(function (error, row) {
-        if (error) throw error;
-        res.json(row);
+        // Finalizes the prepared statement to release its resources.
+        stmt.finalize();
     });
-    // Finalize the prepared statement.
-    stmt.finalize();
-
-})
-
-
-// Get hash-password.
-function sha256(input) {
-    const hash = crypto.createHash('sha256');
-    hash.update(input);
-    return hash.digest('hex');
 }
-
-module.exports = routes;
-

@@ -11,7 +11,6 @@ GET {{url}}/users
 
 ###############################################
 
-
 // Test: Get all posts.
 // Expected HTTP response status code: 200.
 GET {{url}}/posts
@@ -20,27 +19,27 @@ GET {{url}}/posts
 
 // Test: Get a user that exists.
 // Expected HTTP response status code: 200.
-GET {{url}}/users HTTP/1.1
-content-type: application/json 
+GET {{url}}/users/annaandersson HTTP/1.1
+content-type: application/json
+
 {
-    "userName": "mina",
-    "password": "mina123"
+    "password": "annapass"
 }
 
 ###############################################
 
 // Test: Get a user that does not exists
-// Expected HTTP response status code: 404
-GET {{url}}/users HTTP/1.1
-content-type: application/json 
+// Expected HTTP response status code: 404.
+GET {{url}}/users/khurre HTTP/1.1
+content-type: application/json
+
 {
-    "userName": "khurre",
     "password": "khurre123"
 }
 
 ###############################################
 
-// Test: Post (add) a user.
+// Test: Create (POST) a user.
 // Expected HTTP response status code: 201.
 POST {{url}}/users HTTP/1.1
 content-type: application/json
@@ -54,41 +53,88 @@ content-type: application/json
 
 ###############################################
 
-// Test: Delete a post.
-// Expected HTTP response status code: 200.
-DELETE {{url}}/posts/1
-
-###############################################
-
-
-// Test: Add a new post.
-// Expected HTTP response status code: 200.
-POST {{url}}/posts HTTP/1.1
-content-type: application/json
-{
-   "content": "Test test",
-   "user": 3,
-   "likes": 15,
-   "dislikes": 3
-}
-
-###############################################
-
-// Test: Get a specific post.
+// Test: Get a post that exists.
 // Expected HTTP response status code: 200.
 GET {{url}}/posts/1
 
 ###############################################
 
-// Test: Patch post with message, likes, or dislikes.
-// Expected HTTP  response status code: 200.
-PATCH  {{url}}/posts/1 HTTP/1.1
+// Test: Get a post that does not exists
+// Expected HTTP response status code: 404.
+GET {{url}}/posts/khurre
+
+###############################################
+
+// Test: Create (POST) a post.
+// Expected HTTP response status code: 200.
+POST {{url}}/posts HTTP/1.1
 content-type: application/json
+
 {
    "content": "Test test",
-   "user": 3,
-   "likes": 16,
-   "dislikes": 3
+   "user": 3
+}
+
+###############################################
+
+// Test: Like a post.
+// Expected HTTP response status code: 200.
+POST {{url}}/posts/like/1 HTTP/1.1
+content-type: application/json
+
+{
+   "user": 3
+}
+
+###############################################
+
+// Test: Dislike a post.
+// Expected HTTP response status code: 200.
+POST {{url}}/posts/dislike/1 HTTP/1.1
+content-type: application/json
+
+{
+   "user": 4
+}
+
+###############################################
+
+// Test: Update (PATCH) a post.
+// Expected HTTP  response status code: 200.
+PATCH  {{url}}/posts/10 HTTP/1.1
+content-type: application/json
+
+{
+   "content": "Ändrar lite här.",
+   "user": 10
+}
+
+###############################################
+
+// Test: Delete a post.
+// Expected HTTP response status code: 200.
+DELETE {{url}}/posts/10
+
+###############################################
+
+// Test: Delete a like.
+// Expected HTTP response status code: 200.
+DELETE {{url}}/posts/like/1 HTTP/1.1
+content-type: application/json
+
+{
+   "user": 3
+}
+
+###############################################
+
+// Test: Delete a dislike.
+// Expected HTTP response status code: 200.
+DELETE {{url}}/posts/dislike/1 HTTP/1.1
+content-type: application/json
+
+{
+   "user": 4
 }
 
 ###############################################

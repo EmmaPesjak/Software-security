@@ -10,15 +10,13 @@ module.exports = function(db, app) {
         // Prepares the SQL statement.
         const stmt = db.prepare(sql);
 
-        // Executes the prepared statement and returns the result.
-        stmt.all([], (error, req) => {
-            if (error){
-                console.error(error.message);
-                res.status(500).send('Internal server error.');
+        stmt.all(function(err, rows) {
+            if (err) {
+              res.status(500).send('Internal Server Error');
             } else {
-                res.status(200).send(req);
+              res.status(200).json(rows);
             }
-        });
+          });
 
         // Finalizes the prepared statement to release its resources.
         stmt.finalize();
@@ -44,15 +42,15 @@ module.exports = function(db, app) {
 
         // Executes the prepared statement and returns the result.
         stmt.get((err, row) => {
-            if (err){
-                console.error(error.message);
-                res.status(500).send('Internal server error.');
-            } else if (!row) { // Check if no row was found
-                res.status(404).send('Post not found.'); // Return a 404 status code
+            if (err) {
+                console.error(err.message);
+              res.status(500).send('Internal Server Error');
+            } else if (!row) {
+              res.status(404).send('Post not found');
             } else {
-                res.status(200).send(row);
+              res.status(200).json(row);
             }
-        });
+          });
 
         // Finalizes the prepared statement to release its resources.
         stmt.finalize();
@@ -64,48 +62,27 @@ module.exports = function(db, app) {
      */
     app.post('/api/posts', (req, res) => {
         const {content, user} = req.body;
-      
-        // Check if user in question exists.
-        const sqlCheckUser = 'SELECT * FROM user WHERE userId = ?';
-        const stmtCheckUser = db.prepare(sqlCheckUser);
-        stmtCheckUser.bind(user);
-      
-        stmtCheckUser.get((error, row) => {
-            if (error) {
-                console.error(error.message);
-                res.status(500).send('Internal server error.');
-                return;
-            } else if (!row) {
-                res.status(404).send('User not found.');
-                return;
+
+        const sql = `INSERT INTO post(content, user)
+               SELECT ?, ?
+               WHERE EXISTS(SELECT userId FROM user WHERE userId = ?)`;
+        // Prepares the SQL statement.
+        const stmt = db.prepare(sql);
+    
+        // Binds the parameters to the prepared statement.
+        stmt.bind(content, user, user);
+    
+        stmt.run(function(err) {
+            if (err) {
+              res.status(500).send('Internal Server Error');
+            } else if (this.changes === 0) {
+              res.status(400).send('User with specified ID does not exist');
+            } else {
+              res.status(201).send(`Post created with ID ${this.lastID}`);
             }
-            
-            //stmtCheckUser.finalize();
-        
-            // The SQL query to create a post.
-            const sql = 'INSERT INTO post(content, user) VALUES (?, ?)';
-        
-            // Prepares the SQL statement.
-            const stmt = db.prepare(sql);
-        
-            // Binds the parameters to the prepared statement.
-            stmt.bind(content, user);
-        
-            // Executes the prepared statement and returns the result.
-            stmt.run((error) => {
-                if (error) {
-                    console.error(error.message);
-                    res.status(500).send('Internal server error.');
-                } else {
-                    res.status(204).send({id: stmt.lastID});
-                }
-                // Finalizes the prepared statement to release its resources.
-                stmt.finalize();
-            });
-        });
-        
+          });
       
-        stmtCheckUser.finalize();
+        stmt.finalize();
       });
       
 
@@ -117,22 +94,20 @@ module.exports = function(db, app) {
         const postId = req.params.postId,
         user = req.body.user;
 
-        // The SQL query to like the specified post.
-        const sql = 'INSERT INTO like(post, user) VALUES (?, ?)';
+        const sql = `INSERT INTO like(post, user)
+               SELECT ?, ?
+               WHERE EXISTS(SELECT postId FROM post WHERE postId = ?) AND EXISTS(SELECT userId FROM user WHERE userId = ?)`;
 
-        // Prepares the SQL statement.
         const stmt = db.prepare(sql);
+        stmt.bind(postId, user, postId, user);
 
-        // Binds the parameters to the prepared statement.
-        stmt.bind(postId, user);
-
-        // Executes the prepared statement and returns the result.
-        stmt.run((error) => {
-            if (error) {
-                console.error(error.message);
-                res.status(500).send('Internal server error.');
+        stmt.run(function(err) {
+            if (err) {
+                res.status(500).send('Internal Server Error');
+            } else if (this.changes === 0) {
+                res.status(400).send('User or post with specified ID does not exist');
             } else {
-                res.status(204).send({id: this.lastID});
+                res.status(201).send('Like record created successfully');
             }
         });
 
@@ -148,22 +123,20 @@ module.exports = function(db, app) {
         const postId = req.params.postId,
         user = req.body.user;
 
-        // The SQL query to like the specified post.
-        const sql = 'INSERT INTO dislike(post, user) VALUES (?, ?)';
+        const sql = `INSERT INTO dislike(post, user)
+               SELECT ?, ?
+               WHERE EXISTS(SELECT postId FROM post WHERE postId = ?) AND EXISTS(SELECT userId FROM user WHERE userId = ?)`;
 
-        // Prepares the SQL statement.
         const stmt = db.prepare(sql);
+        stmt.bind(postId, user, postId, user);
 
-        // Binds the parameters to the prepared statement.
-        stmt.bind(postId, user);
-
-        // Executes the prepared statement and returns the result.
-        stmt.run((error) => {
-            if (error) {
-                console.error(error.message);
-                res.status(500).send('Internal server error.');
+        stmt.run(function(err) {
+            if (err) {
+                res.status(500).send('Internal Server Error');
+            } else if (this.changes === 0) {
+                res.status(400).send('User or post with specified ID does not exist');
             } else {
-                res.status(204).send({id: this.lastID});
+                res.status(201).send('Like record created successfully');
             }
         });
 
@@ -189,14 +162,15 @@ module.exports = function(db, app) {
         stmt.bind(content, postId);
 
         // Executes the prepared statement and returns the result.
-        stmt.run((error) => {
-            if (error) {
-                console.error(error.message);
-                res.status(500).send('Internal server error.');
+        stmt.run(function(err) {
+            if (err) {
+              res.status(500).send('Internal Server Error');
+            } else if (this.changes === 0) {
+              res.status(404).send('Post with specified ID not found');
             } else {
-                res.status(204).send({id: this.lastID});
+              res.status(200).send('Post updated successfully');
             }
-        });
+          });
 
         // Finalizes the prepared statement to release its resources.
         stmt.finalize();
@@ -219,14 +193,15 @@ module.exports = function(db, app) {
         stmt.bind(postId);
 
         // Executes the prepared statement and returns the result.
-        stmt.run((error) => {
-            if (error) {
-                console.error(error.message);
-                res.status(500).send('Internal server error.');
+        stmt.run(function(err) {
+            if (err) {
+              res.status(500).send('Internal Server Error');
+            } else if (this.changes === 0) {
+              res.status(404).send('Post with specified ID not found');
             } else {
                 res.status(204).send({id: this.lastID});
             }
-        });
+          });
 
         // Finalizes the prepared statement to release its resources.
         stmt.finalize();
@@ -239,22 +214,21 @@ module.exports = function(db, app) {
         const postId = req.params.postId,
         user = req.body.user;
 
-        // The SQL query to delete the specified post.
-        const sql = 'DELETE FROM like WHERE post = ? AND user = ?';
+        const sql = `DELETE FROM like
+               WHERE user = ? AND post = ?
+               AND EXISTS(SELECT userId FROM user WHERE userId = ?)
+               AND EXISTS(SELECT postId FROM post WHERE postId = ?)`;
 
-        // Prepares the SQL statement.
         const stmt = db.prepare(sql);
+        stmt.bind(user, postId, user, postId);
 
-        // Binds the parameters to the prepared statement.
-        stmt.bind(postId, user);
-
-        // Executes the prepared statement and returns the result.
-        stmt.run((error) => {
-            if (error) {
-                console.error(error.message);
-                res.status(500).send('Internal server error.');
+        stmt.run(function(err) {
+            if (err) {
+                res.status(500).send('Internal Server Error');
+            } else if (this.changes === 0) {
+                res.status(404).send('Like with specified user and post not found');
             } else {
-                res.status(204).send({id: this.lastID});
+                res.status(204).send('Like deleted successfully');
             }
         });
 

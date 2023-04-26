@@ -12,6 +12,7 @@ module.exports = function(db, app, crypto) {
 
         stmt.all(function(err, rows) {
             if (err) {
+                console.error(err.message);
               res.status(500).send('Internal Server Error');
             } else {
               res.status(200).json(rows);
@@ -42,6 +43,8 @@ module.exports = function(db, app, crypto) {
 
         stmt.get((err, row) => {
             if (err) {
+                
+                console.error(err.message);
               res.status(500).send('Internal Server Error');
             } else if (!row) {
               res.status(404).send('User not found');
@@ -85,6 +88,8 @@ module.exports = function(db, app, crypto) {
         // Executes the prepared statement and returns the result.
         stmt.run(function(err) {
             if (err) {
+                
+                console.error(err.message);
               res.status(500).send('Internal Server Error');
             } else {
               res.status(201).send(`User created with ID ${this.lastID}`);

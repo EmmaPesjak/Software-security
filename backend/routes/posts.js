@@ -6,7 +6,6 @@ module.exports = function(db, app) {
     app.get('/api/posts', (req, res) => {
         // The SQL query to retrieve all posts..
         const sql = 'SELECT p.*, u.name FROM post AS p, user AS u WHERE p.user = u.userId';
-        //const sql = 'SELECT * FROM post';
 
         // Prepares the SQL statement.
         const stmt = db.prepare(sql);
@@ -65,47 +64,50 @@ module.exports = function(db, app) {
      */
     app.post('/api/posts', (req, res) => {
         const {content, user} = req.body;
-    
+      
         // Check if user in question exists.
         const sqlCheckUser = 'SELECT * FROM user WHERE userId = ?';
         const stmtCheckUser = db.prepare(sqlCheckUser);
         stmtCheckUser.bind(user);
-    
+      
         stmtCheckUser.get((error, row) => {
             if (error) {
                 console.error(error.message);
                 res.status(500).send('Internal server error.');
+                return;
             } else if (!row) {
-                res.status(404).send('User not found.'); // Return a 404 status code
-            } else {
-                // The SQL query to create a post.
-                const sql = 'INSERT INTO post(content, user) VALUES (?, ?)';
-    
-                // Prepares the SQL statement.
-                const stmt = db.prepare(sql);
-    
-                // Binds the parameters to the prepared statement.
-                stmt.bind(content, user);
-    
-                // Executes the prepared statement and returns the result.
-                stmt.run((err, post) => {
-                    if (err) {
-                        console.error(err.message);
-                        res.status(500).send('Internal server error.');
-                    } else {
-                        res.status(201).send({id: stmt.lastID});
-                    }
-                });
-    
+                res.status(404).send('User not found.');
+                return;
+            }
+            
+            //stmtCheckUser.finalize();
+        
+            // The SQL query to create a post.
+            const sql = 'INSERT INTO post(content, user) VALUES (?, ?)';
+        
+            // Prepares the SQL statement.
+            const stmt = db.prepare(sql);
+        
+            // Binds the parameters to the prepared statement.
+            stmt.bind(content, user);
+        
+            // Executes the prepared statement and returns the result.
+            stmt.run((error) => {
+                if (error) {
+                    console.error(error.message);
+                    res.status(500).send('Internal server error.');
+                } else {
+                    res.status(204).send({id: stmt.lastID});
+                }
                 // Finalizes the prepared statement to release its resources.
                 stmt.finalize();
-            }
+            });
         });
-    
-        // Finalizes the prepared statement to release its resources.
+        
+      
         stmtCheckUser.finalize();
-    });
-    
+      });
+      
 
     //* POST
     /**

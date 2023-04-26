@@ -28,6 +28,7 @@ content-type: application/json
 
 ###############################################
 
+// DOES NOT WORK
 // Test: Get a user that does not exists
 // Expected HTTP response status code: 404.
 GET {{url}}/users/khurre HTTP/1.1
@@ -45,10 +46,10 @@ POST {{url}}/users HTTP/1.1
 content-type: application/json
 
 {
-    "userName": "ekan",
-    "name": "Erik",
-    "email": "erik@hej.com",
-    "password": "erik123"
+    "userName": "limalm",
+    "name": "Li Malm",
+    "email": "limalm@gmail.com",
+    "password": "li123"
 }
 
 ###############################################

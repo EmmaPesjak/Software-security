@@ -6,14 +6,19 @@ module.exports = function(db, app) {
     app.get('/api/posts', (req, res) => {
         // The SQL query to retrieve all users.
         const sql = 'SELECT p.*, u.name FROM post AS p, user AS u WHERE p.user = u.userId';
+        //const sql = 'SELECT * FROM post';
 
         // Prepares the SQL statement.
         const stmt = db.prepare(sql);
 
         // Executes the prepared statement and returns the result.
         stmt.all([], (error, req) => {
-            if (error) throw error;
-            res.json(req);
+            if (error){
+                console.error(error.message);
+                res.status(500).send('Internal server error.');
+            } else {
+                res.status(200).json(req);
+            }
         });
 
         // Finalizes the prepared statement to release its resources.
@@ -28,7 +33,9 @@ module.exports = function(db, app) {
         const postId = req.params.postId;
 
         // The SQL query to retrieve the specified user.
-        const sql = 'SELECT p.*, u.name FROM post AS p, user AS u WHERE postId = ? AND p.user = u.userId'
+        //const sql = 'SELECT p.*, u.name FROM post AS p, user AS u WHERE postId = ? AND p.user = u.userId'
+
+        const sql = 'SELECT * FROM post WHERE postId = ?';
 
         // Prepares the SQL statement.
         let stmt = db.prepare(sql);
@@ -38,8 +45,14 @@ module.exports = function(db, app) {
 
         // Executes the prepared statement and returns the result.
         stmt.get((err, row) => {
-            if (err) throw err;
-            res.json(row);
+            if (err){
+                console.error(error.message);
+                res.status(500).send('Internal server error.');
+            } else if (!row) { // Check if no row was found
+                res.status(404).send('Post not found.'); // Return a 404 status code
+            } else {
+                res.json(row);
+            }
         });
 
         // Finalizes the prepared statement to release its resources.
@@ -52,25 +65,48 @@ module.exports = function(db, app) {
      */
     app.post('/api/posts', (req, res) => {
         const {content, user} = req.body;
-
-        // The SQL query to create a post.
-        const sql = 'INSERT INTO post(content, user) VALUES (?, ?)';
-
-        // Prepares the SQL statement.
-        const stmt = db.prepare(sql);
-
-        // Binds the parameters to the prepared statement.
-        stmt.bind(content, user);
-
-        // Executes the prepared statement and returns the result.
-        stmt.run(function (error) {
-            if (error) throw error;
-            res.json({id: this.lastID});
+      
+        // Check if user in question exists.
+        const sqlCheckUser = 'SELECT * FROM user WHERE userId = ?';
+        const stmtCheckUser = db.prepare(sqlCheckUser);
+        stmtCheckUser.bind(user);
+      
+        stmtCheckUser.get((error, row) => {
+          if (error){
+            console.error(error.message);
+            res.status(500).send('Internal server error.');
+            return;
+          } else if (!row){
+            res.status(404).send('User not found.'); // Return a 404 status code
+            return;
+          } else {
+            // The SQL query to create a post.
+            const sql = 'INSERT INTO post(content, user) VALUES (?, ?)';
+      
+            // Prepares the SQL statement.
+            const stmt = db.prepare(sql);
+      
+            // Binds the parameters to the prepared statement.
+            stmt.bind(content, user);
+      
+            // Executes the prepared statement and returns the result.
+            stmt.run((error) => {
+              if (error){
+                console.error(error.message);
+                res.status(500).send('Internal server error.');
+              } else {
+                res.status(204).send({id: stmt.lastID});
+              }
+            });
+      
+            // Finalizes the prepared statement to release its resources.
+            stmt.finalize();
+          }
         });
-
-        // Finalizes the prepared statement to release its resources.
-        stmt.finalize();
-    });
+      
+        stmtCheckUser.finalize();
+      });
+      
 
     //* POST
     /**

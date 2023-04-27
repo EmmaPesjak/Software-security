@@ -77,7 +77,7 @@ module.exports = function(db, app, crypto) {
         hashedPassword = sha256(password);
 
         // The SQL query to create a user.
-        const sql = 'INSERT INTO user(username, hashedPassword, name, email) VALUES (?, ?, ?, ?)';
+        const sql = 'INSERT INTO user(username, hashedPassword, name, email) VALUES (?, ?, ?, ?) RETURNING *';
 
         // Prepares the SQL statement.
         const stmt = db.prepare(sql);
@@ -86,13 +86,12 @@ module.exports = function(db, app, crypto) {
         stmt.bind(userName, hashedPassword, name, email);
 
         // Executes the prepared statement and returns the result.
-        stmt.run(function(err) {
+        stmt.get(function(err, result) {
             if (err) {
-                
-                console.error(err.message);
+              console.error(err.message);
               res.status(500).send('Internal Server Error');
             } else {
-              res.status(201).send(`User created with ID ${this.lastID}`);
+              res.status(201).send(result);
             }
           });
         // Finalizes the prepared statement to release its resources.

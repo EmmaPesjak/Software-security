@@ -88,7 +88,8 @@ module.exports = function(db, app) {
         // Make sure that user exists.
         const sql = `INSERT INTO post(content, user)
                SELECT ?, ?
-               WHERE EXISTS(SELECT userId FROM user WHERE userId = ?)`;
+               WHERE EXISTS(SELECT userId FROM user WHERE userId = ?)
+               RETURNING *`;
 
         // Prepares the SQL statement.
         const stmt = db.prepare(sql);
@@ -97,13 +98,13 @@ module.exports = function(db, app) {
         stmt.bind(content, user, user);
     
         // Executes the prepared statement and returns the result.
-        stmt.run(function(err) {
+        stmt.get(function(err, result) {
             if (err) {
               res.status(500).send('Internal Server Error');
             } else if (this.changes === 0) {
               res.status(400).send('User with specified ID does not exist');
             } else {
-              res.status(201).send(`Post created with ID ${this.lastID}`);
+              res.status(201).send(result);
             }
           });
       

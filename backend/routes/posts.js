@@ -4,17 +4,29 @@ module.exports = function(db, app) {
      * Retrieves all posts.
      */
     app.get('/api/posts', (req, res) => {
-        // The SQL query to retrieve all users.
-        const sql = 'SELECT p.*, u.name FROM post AS p, user AS u WHERE p.user = u.userId';
+        // The SQL query to retrieve all posts..
+        //const sql = 'SELECT p.*, u.name FROM post AS p, user AS u WHERE p.user = u.userId';
+
+        // Join likes and dislikes with posts.
+        const sql = `
+        SELECT p.*, u.name, COUNT(DISTINCT l.user) AS likes, COUNT(DISTINCT d.user) AS dislikes
+        FROM post AS p
+        JOIN user AS u ON p.user = u.userId
+        LEFT JOIN like AS l ON p.postId = l.post
+        LEFT JOIN dislike AS d ON p.postId = d.post
+        GROUP BY p.postId
+        `;
 
         // Prepares the SQL statement.
         const stmt = db.prepare(sql);
 
-        // Executes the prepared statement and returns the result.
-        stmt.all([], (error, req) => {
-            if (error) throw error;
-            res.json(req);
-        });
+        stmt.all(function(err, rows) {
+            if (err) {
+              res.status(500).send('Internal Server Error');
+            } else {
+              res.status(200).json(rows);
+            }
+          });
 
         // Finalizes the prepared statement to release its resources.
         stmt.finalize();
@@ -28,7 +40,21 @@ module.exports = function(db, app) {
         const postId = req.params.postId;
 
         // The SQL query to retrieve the specified user.
-        const sql = 'SELECT p.*, u.name FROM post AS p, user AS u WHERE postId = ? AND p.user = u.userId'
+        //const sql = 'SELECT p.*, u.name FROM post AS p, user AS u WHERE postId = ? AND p.user = u.userId'
+
+        // Join likes and dislikes with post.
+        const sql = `SELECT p.*, u.name,
+        COUNT(DISTINCT like.user) AS likes,
+        COUNT(DISTINCT dislike.user) AS dislikes
+        FROM post AS p
+        JOIN user AS u ON p.user = u.userId
+        LEFT JOIN like ON p.postId = like.post
+        LEFT JOIN dislike ON p.postId = dislike.post
+        WHERE p.postId = ?
+        GROUP BY p.postId
+        `;
+
+        //const sql = 'SELECT * FROM post WHERE postId = ?';
 
         // Prepares the SQL statement.
         let stmt = db.prepare(sql);
@@ -38,9 +64,15 @@ module.exports = function(db, app) {
 
         // Executes the prepared statement and returns the result.
         stmt.get((err, row) => {
-            if (err) throw err;
-            res.json(row);
-        });
+            if (err) {
+                console.error(err.message);
+              res.status(500).send('Internal Server Error');
+            } else if (!row) {
+              res.status(404).send('Post not found');
+            } else {
+              res.status(200).json(row);
+            }
+          });
 
         // Finalizes the prepared statement to release its resources.
         stmt.finalize();
@@ -53,24 +85,31 @@ module.exports = function(db, app) {
     app.post('/api/posts', (req, res) => {
         const {content, user} = req.body;
 
-        // The SQL query to create a post.
-        const sql = 'INSERT INTO post(content, user) VALUES (?, ?)';
+        // Make sure that user exists.
+        const sql = `INSERT INTO post(content, user)
+               SELECT ?, ?
+               WHERE EXISTS(SELECT userId FROM user WHERE userId = ?)`;
 
         // Prepares the SQL statement.
         const stmt = db.prepare(sql);
-
+    
         // Binds the parameters to the prepared statement.
-        stmt.bind(content, user);
-
+        stmt.bind(content, user, user);
+    
         // Executes the prepared statement and returns the result.
-        stmt.run(function (error) {
-            if (error) throw error;
-            res.json({id: this.lastID});
-        });
-
-        // Finalizes the prepared statement to release its resources.
+        stmt.run(function(err) {
+            if (err) {
+              res.status(500).send('Internal Server Error');
+            } else if (this.changes === 0) {
+              res.status(400).send('User with specified ID does not exist');
+            } else {
+              res.status(201).send(`Post created with ID ${this.lastID}`);
+            }
+          });
+      
         stmt.finalize();
-    });
+      });
+      
 
     //* POST
     /**
@@ -80,22 +119,22 @@ module.exports = function(db, app) {
         const postId = req.params.postId,
         user = req.body.user;
 
-        // The SQL query to like the specified post.
-        const sql = 'INSERT INTO like(post, user) VALUES (?, ?)';
+        // Make sure that post and user exists.
+        const sql = `INSERT INTO like(post, user)
+               SELECT ?, ?
+               WHERE EXISTS(SELECT postId FROM post WHERE postId = ?) AND EXISTS(SELECT userId FROM user WHERE userId = ?)`;
 
-        // Prepares the SQL statement.
         const stmt = db.prepare(sql);
-
-        // Binds the parameters to the prepared statement.
-        stmt.bind(postId, user);
+        stmt.bind(postId, user, postId, user);
 
         // Executes the prepared statement and returns the result.
-        stmt.run((error) => {
-            if (error) {
-                console.error(error.message);
-                res.status(500).send('Internal server error.');
+        stmt.run(function(err) {
+            if (err) {
+                res.status(500).send('Internal Server Error');
+            } else if (this.changes === 0) {
+                res.status(400).send('User or post with specified ID does not exist');
             } else {
-                res.status(204).send({id: this.lastID});
+                res.status(201).send('Like record created successfully');
             }
         });
 
@@ -111,22 +150,22 @@ module.exports = function(db, app) {
         const postId = req.params.postId,
         user = req.body.user;
 
-        // The SQL query to like the specified post.
-        const sql = 'INSERT INTO dislike(post, user) VALUES (?, ?)';
+        // Make sure that post and user exists.
+        const sql = `INSERT INTO dislike(post, user)
+               SELECT ?, ?
+               WHERE EXISTS(SELECT postId FROM post WHERE postId = ?) AND EXISTS(SELECT userId FROM user WHERE userId = ?)`;
 
-        // Prepares the SQL statement.
         const stmt = db.prepare(sql);
-
-        // Binds the parameters to the prepared statement.
-        stmt.bind(postId, user);
+        stmt.bind(postId, user, postId, user);
 
         // Executes the prepared statement and returns the result.
-        stmt.run((error) => {
-            if (error) {
-                console.error(error.message);
-                res.status(500).send('Internal server error.');
+        stmt.run(function(err) {
+            if (err) {
+                res.status(500).send('Internal Server Error');
+            } else if (this.changes === 0) {
+                res.status(400).send('User or post with specified ID does not exist');
             } else {
-                res.status(204).send({id: this.lastID});
+                res.status(201).send('Like record created successfully');
             }
         });
 
@@ -152,14 +191,15 @@ module.exports = function(db, app) {
         stmt.bind(content, postId);
 
         // Executes the prepared statement and returns the result.
-        stmt.run((error) => {
-            if (error) {
-                console.error(error.message);
-                res.status(500).send('Internal server error.');
+        stmt.run(function(err) {
+            if (err) {
+              res.status(500).send('Internal Server Error');
+            } else if (this.changes === 0) {
+              res.status(404).send('Post with specified ID not found');
             } else {
-                res.status(204).send({id: this.lastID});
+              res.status(200).send('Post updated successfully');
             }
-        });
+          });
 
         // Finalizes the prepared statement to release its resources.
         stmt.finalize();
@@ -182,14 +222,15 @@ module.exports = function(db, app) {
         stmt.bind(postId);
 
         // Executes the prepared statement and returns the result.
-        stmt.run((error) => {
-            if (error) {
-                console.error(error.message);
-                res.status(500).send('Internal server error.');
+        stmt.run(function(err) {
+            if (err) {
+              res.status(500).send('Internal Server Error');
+            } else if (this.changes === 0) {
+              res.status(404).send('Post with specified ID not found');
             } else {
                 res.status(204).send({id: this.lastID});
             }
-        });
+          });
 
         // Finalizes the prepared statement to release its resources.
         stmt.finalize();
@@ -202,22 +243,22 @@ module.exports = function(db, app) {
         const postId = req.params.postId,
         user = req.body.user;
 
-        // The SQL query to delete the specified post.
-        const sql = 'DELETE FROM like WHERE post = ? AND user = ?';
+        // Make sure that user and post exists.
+        const sql = `DELETE FROM like
+               WHERE user = ? AND post = ?
+               AND EXISTS(SELECT userId FROM user WHERE userId = ?)
+               AND EXISTS(SELECT postId FROM post WHERE postId = ?)`;
 
-        // Prepares the SQL statement.
         const stmt = db.prepare(sql);
+        stmt.bind(user, postId, user, postId);
 
-        // Binds the parameters to the prepared statement.
-        stmt.bind(postId, user);
-
-        // Executes the prepared statement and returns the result.
-        stmt.run((error) => {
-            if (error) {
-                console.error(error.message);
-                res.status(500).send('Internal server error.');
+        stmt.run(function(err) {
+            if (err) {
+                res.status(500).send('Internal Server Error');
+            } else if (this.changes === 0) {
+                res.status(404).send('Like with specified user and post not found');
             } else {
-                res.status(204).send({id: this.lastID});
+                res.status(204).send('Like deleted successfully');
             }
         });
 
@@ -232,8 +273,11 @@ module.exports = function(db, app) {
         const postId = req.params.postId,
         user = req.body.user;
 
-        // The SQL query to delete the specified post.
-        const sql = 'DELETE FROM dislike WHERE post = ? AND user = ?';
+        // Make sure that user and post exists.
+        const sql = `DELETE FROM dislike
+               WHERE user = ? AND post = ?
+               AND EXISTS(SELECT userId FROM user WHERE userId = ?)
+               AND EXISTS(SELECT postId FROM post WHERE postId = ?)`;
 
         // Prepares the SQL statement.
         const stmt = db.prepare(sql);
@@ -242,12 +286,13 @@ module.exports = function(db, app) {
         stmt.bind(postId, user);
 
         // Executes the prepared statement and returns the result.
-        stmt.run((error) => {
-            if (error) {
-                console.error(error.message);
-                res.status(500).send('Internal server error.');
+        stmt.run(function(err) {
+            if (err) {
+                res.status(500).send('Internal Server Error');
+            } else if (this.changes === 0) {
+                res.status(404).send('Dislike with specified user and post not found');
             } else {
-                res.status(204).send({id: this.lastID});
+                res.status(204).send('Like deleted successfully');
             }
         });
 

@@ -10,11 +10,14 @@ module.exports = function(db, app, crypto) {
         // Prepares the SQL statement.
         const stmt = db.prepare(sql);
 
-        // Executes the prepared statement and returns the result.
-        stmt.all([], (error, req) => {
-            if (error) throw error;
-            res.json(req);
-        });
+        stmt.all(function(err, rows) {
+            if (err) {
+                console.error(err.message);
+              res.status(500).send('Internal Server Error');
+            } else {
+              res.status(200).json(rows);
+            }
+          });
 
         // Finalizes the prepared statement to release its resources.
         stmt.finalize();
@@ -38,11 +41,17 @@ module.exports = function(db, app, crypto) {
         // Binds the parameters to the prepared statement.
         stmt.bind(userName, hashedPassword);
 
-        // Executes the prepared statement and returns the result.
         stmt.get((err, row) => {
-            if (err) throw err;
-            res.json(row);
-        });
+            if (err) {
+                
+                console.error(err.message);
+              res.status(500).send('Internal Server Error');
+            } else if (!row) {
+              res.status(404).send('User not found');
+            } else {
+              res.status(200).json(row);
+            }
+          });
 
         // Finalizes the prepared statement to release its resources.
         stmt.finalize();
@@ -56,6 +65,8 @@ module.exports = function(db, app, crypto) {
         hash.update(input);
         return hash.digest('hex');
     }
+
+    
 
     //* POST
     /**
@@ -74,12 +85,16 @@ module.exports = function(db, app, crypto) {
         // Binds the parameters to the prepared statement.
         stmt.bind(userName, hashedPassword, name, email);
 
-        // Execute the prepared statement and returns the result.
-        stmt.run(function (error) {
-            if (error) throw error;
-            res.json({id: this.lastID});
-        });
-
+        // Executes the prepared statement and returns the result.
+        stmt.run(function(err) {
+            if (err) {
+                
+                console.error(err.message);
+              res.status(500).send('Internal Server Error');
+            } else {
+              res.status(201).send(`User created with ID ${this.lastID}`);
+            }
+          });
         // Finalizes the prepared statement to release its resources.
         stmt.finalize();
     });

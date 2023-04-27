@@ -55,6 +55,21 @@ export class RegisterComponent {
       return;
     }
 
+    // ADDED BY EBBA TO CHECK STRONG PASSWORD
+    const smallLetters = /.*[a-z].*/.test(this.password);
+    const bigLetters = /.*[A-Z].*/.test(this.password);
+    const numbers = /.*[0-9].*/.test(this.password);
+    const specialChars = /.*[!@#$%^&*()_+}{"':;?/>.<,].*/.test(this.password);
+    const containsName = this.password.toLowerCase().includes(this.name.replace(/\s/g, "").toLowerCase());
+    const containsUserName = this.password.toLowerCase().includes(this.userName.toLowerCase());
+    const length = this.password.length;
+
+    // CHECK IF ANY ARE FALSE RESULTS
+    if (!smallLetters || !bigLetters || !numbers || !specialChars || length < 12 || containsName || containsUserName){
+      this.displayMessage("Password must contain small letters, big letters, numbers, special symbols, and minimum length is 12 and cannot include your name or username.");
+      return;
+    }
+
     let addUserPromise: Promise<User>;
 
     addUserPromise = this.backend.addUser({

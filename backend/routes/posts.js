@@ -229,7 +229,7 @@ module.exports = function(db, app) {
             } else if (this.changes === 0) {
               res.status(404).send('Post with specified ID not found');
             } else {
-                res.status(204).send({id: this.lastID});
+              res.status(204).send();
             }
           });
 

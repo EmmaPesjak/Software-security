@@ -81,7 +81,7 @@ export class AddPostComponent {
    */
   handleError(error: HttpErrorResponse) {
     console.error(`error adding post: ${error.status} ${error.statusText}`);
-    const message: string = error.error.error;
+    const message: string = error.message;
     // Display the error message.
     this.displayMessage(message);
   }

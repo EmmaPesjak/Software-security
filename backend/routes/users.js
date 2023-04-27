@@ -95,10 +95,15 @@ module.exports = function(db, app, crypto, sessionIds) {
     stmt.bind(userName, hashedPassword, name, email);
 
     // Executes the prepared statement and returns the result.
+    
     stmt.get(function(err, row) {
       if (err) {
-        console.error(err.message);
-        res.status(500).json({"error": "Internal Server Error."});
+        if (err.code === 'SQLITE_CONSTRAINT') {
+            res.status(400).json({ message: 'User already exists' });
+        } else {
+            console.error(err.message);
+            res.status(500).json({"error": "Internal Server Error."});
+        }
       } else {
         res.status(201).send(row);
       }

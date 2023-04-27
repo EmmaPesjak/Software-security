@@ -82,7 +82,7 @@ export class RegisterComponent {
    */
   handleError(error: HttpErrorResponse) {
     console.error(`error adding user: ${error.status} ${error.statusText}`);
-    const message: string = error.message;
+    const message: string = error.error.message;
     console.log(error);
     // Display the error message.
     this.displayMessage(message);

@@ -13,11 +13,12 @@ GET {{url}}/users
 
 // Test: Get all posts.
 // Expected HTTP response status code: 200.
-GET {{url}}/users/annaandersson/posts HTTP/1.1
+GET {{url}}/posts HTTP/1.1
 content-type: application/json
 
 {
-   "debug": true
+   "debug": true,
+   "userName": "annaandersson"
 }
 
 ###############################################

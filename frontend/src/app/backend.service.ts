@@ -38,9 +38,7 @@ export class BackendService {
     const endpoint = this.API_URL + '/api/posts';
     const body = {
       user: post.user,
-      content: post.content,
-      likes: post.likes,
-      dislikes: post.dislikes
+      content: post.content
     };
     const responseObservable = this.http.post<Post>(endpoint, body);
     const responsePromise = firstValueFrom(responseObservable);

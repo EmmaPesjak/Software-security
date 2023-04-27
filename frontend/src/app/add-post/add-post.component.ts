@@ -16,6 +16,7 @@ export class AddPostComponent {
 
   postId?: number;
   user: string;
+  name: string;
   content: string;
 
   message: string | undefined;
@@ -26,6 +27,7 @@ export class AddPostComponent {
   constructor(private backend: BackendService) {
     this.postId = undefined;
     this.user = "";
+    this.name = "";
     this.content = "";
     this.newPostEvent = new EventEmitter<Post>();
   }
@@ -41,6 +43,7 @@ export class AddPostComponent {
     addPostPromise = this.backend.addPost({
       postId: this.postId ?? 0,
       user: this.user,
+      name: this.name,
       content: this.content,
       likes: 0,
       dislikes: 0
@@ -61,6 +64,7 @@ export class AddPostComponent {
     // Clear user input.
     this.postId = undefined;
     this.user = "";
+    this.name = "";
     this.content = "";
 
     // Create and display a success message.

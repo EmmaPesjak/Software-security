@@ -15,20 +15,18 @@
 
     
     <ng-container *ngFor="let post of posts">
-        <div class="forum_post">
-            <!-- SKA DET VARA TOLOWERCASE? -->
-            <div *ngIf="searchText === '' || post.content.toLowerCase().includes(searchText.toLowerCase()) || post.user.toLowerCase().includes(searchText.toLowerCase())">
-                <div class="post_user"><b>{{ post.user }}</b></div>
-                <div class="post_content">{{ post.content }}</div>
-                <div class="post_btns">
-                    <!-- HÄR GÖR INGA KNAPPAR RÄTT!!! -->
-                    <button type="button" class="like"><img id="thumb_up" src="assets/img/thumb_up.png" alt="thumbs up button"></button>
-                    <p>{{ post.likes }}</p>
-                    <button type="button" class="dislike"><img id="thumb_down" src="assets/img/thumb_down.png" alt="thumbs down button"></button>
-                    <p>{{ post.dislikes }}</p>
-                    <button type="button" class="delete">Delete</button><!-- HÄR FÅR MAN LÄGGA TILL EN *ngIf username!!! -->
-                    <button type="button" class="edit">Edit</button><!-- HÄR FÅR MAN FIXA ATT DET POPPAR UPP EN EDIT RUTA!!! -->
-                </div>
+        <div class="forum_post" *ngIf="searchText === '' || post.content.toLowerCase().includes(searchText.toLowerCase()) || post.name.toLowerCase().includes(searchText.toLowerCase())">
+            
+            <div class="post_name"><b>{{ post.name }}</b></div>
+            <div class="post_content">{{ post.content }}</div>
+            <div class="post_btns">
+                <!-- HÄR GÖR INGA KNAPPAR RÄTT!!! -->
+                <button type="button" class="like"><img id="thumb_up" src="assets/img/thumb_up.png" alt="thumbs up button"></button>
+                <p>{{ post.likes }}</p>
+                <button type="button" class="dislike"><img id="thumb_down" src="assets/img/thumb_down.png" alt="thumbs down button"></button>
+                <p>{{ post.dislikes }}</p>
+                <button type="button" class="delete">Delete</button><!-- HÄR FÅR MAN LÄGGA TILL EN *ngIf username!!! -->
+                <button type="button" class="edit">Edit</button><!-- HÄR FÅR MAN FIXA ATT DET POPPAR UPP EN EDIT RUTA!!! -->
             </div>
         </div>
     </ng-container>

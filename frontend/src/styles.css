@@ -5,7 +5,7 @@ html {
     background-image: url(assets/img/background.jpg);
     background-position: center center;
     background-size: cover;
-    background-repeat: no-repeat;
+    background-repeat: repeat;
 }
 
 body {

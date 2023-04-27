@@ -3,8 +3,8 @@ module.exports = function(db, app, sessionIds) {
   /**
    * Retrieves all posts.
    */
-  app.get('/api/users/:userName/posts', (req, res) => {
-    const userName = req.params.userName;
+  app.get('/api/posts', (req, res) => {
+    const userName = req.body.userName;
 
     console.log(req.cookies.ID);
     console.log(sessionIds.get(userName));

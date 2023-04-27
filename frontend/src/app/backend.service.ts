@@ -50,8 +50,8 @@ export class BackendService {
    * @param postId is the ID of the post to delete.
    * @returns a Promise that resolves to the deleted post.
    */
-  deletePost(postId: string) {
-    const endpoint = this.API_URL + '/api/posts/' + postId;
+  deletePost(post: Post) {
+    const endpoint = this.API_URL + '/api/posts/' + post.postId;
     const responseObservable = this.http.delete<Post>(endpoint);
     const responsePromise = firstValueFrom(responseObservable);
     return responsePromise;

@@ -53,4 +53,25 @@ export class ForumComponent {
   showAdd() {
     this.showAddBox = true;
   }
+
+  deletePost(post: Post) {
+    this.backend.deletePost(post)
+      .then(() => {
+
+        // Get the index of the post in the array.
+        const postIndex = this.posts.findIndex(
+          
+          postInArray => postInArray.postId == post.postId);
+        
+
+        // Do nothing if the restaurant does not exist.
+        if (postIndex == -1) {
+          return;
+        }
+
+        //Remove it from the array.
+        this.posts.splice(postIndex, 1);
+      })
+      .catch(error => console.error(`An error occurred when deleting the post: ${error}`));
+  }
 }

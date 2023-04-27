@@ -42,9 +42,16 @@ export class RegisterComponent {
    */
   addUser() {
 
-    // ADDED BY EBBA TO CHECK MATCH
+    // ADDED BY EBBA TO CHECK PASSWORD MATCH
     if (this.password !== this.passwordRepeat) {
       this.displayMessage("Passwords do not match");
+      return;
+    }
+
+    // ADDED BY EBBA TO CHECK IF VALID EMAIL
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(this.email)) {
+      this.displayMessage("Invalid email address");
       return;
     }
 

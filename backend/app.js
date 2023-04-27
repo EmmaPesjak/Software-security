@@ -3,6 +3,7 @@ const sqlite3 = require('sqlite3').verbose(),
 express = require('express'),
 cors = require('cors'),
 crypto = require('crypto'),
+cookieParser = require('cookie-parser'),
 users = require('./routes/users'),
 posts = require('./routes/posts');
 
@@ -28,7 +29,9 @@ if (db) {
     // Enables parsing of JSON requests
     // (puts the parsed data in `req.body`).
     app.use(express.json());
-    app.use(express.urlencoded({ extended: true }));
+    app.use(express.urlencoded({extended: true}));
+    // Enables parsing of cookies.
+    app.use(cookieParser());
 
     // The port utilized by the server.
     const port = process.env.PORT || 3000;
@@ -37,9 +40,11 @@ if (db) {
         console.log(`The server is running on port ${port}.`);
     });
 
-    // Exports `db`, `app` and `crypto`.
-    users(db, app, crypto);
-    posts(db, app);
+    const sessionIds = new Map();
+
+    // Exports `db`, `app`, `crypto`, and `sessionIds`.
+    users(db, app, crypto, sessionIds);
+    posts(db, app, sessionIds);
 }
 
 // // Closes the connection to the DB.

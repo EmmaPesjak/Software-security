@@ -163,7 +163,7 @@ content-type: application/json
 
 // Test: Delete a post that exists.
 // Expected HTTP response status code: 204.
-DELETE {{url}}/posts/12
+DELETE {{url}}/posts/10
 
 ###############################################
 

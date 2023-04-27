@@ -64,7 +64,7 @@ export class RegisterComponent {
     const containsUserName = this.password.toLowerCase().includes(this.userName.toLowerCase());
     const length = this.password.length;
 
-    // CHECK IF ANY ARE FALSE RESULTS
+    // ADDED BY EBBA TO CHECK IF ANY ARE FALSE RESULTS
     if (!smallLetters || !bigLetters || !numbers || !specialChars || length < 12 || containsName || containsUserName){
       this.displayMessage("Password must contain small letters, big letters, numbers, special symbols, and minimum length is 12 and cannot include your name or username.");
       return;
@@ -112,8 +112,9 @@ export class RegisterComponent {
   handleError(error: HttpErrorResponse) {
     console.error(`error adding user: ${error.status} ${error.statusText}`);
 
-    // MODIFIED BY EBBA
+    // ADDED BY EBBA TO DISPLAY PROPER MESSAGE
     const message: string = error.error.message;
+    
     console.log(error);
     // Display the error message.
     this.displayMessage(message);

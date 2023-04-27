@@ -1,4 +1,7 @@
+//const { verifyToken } = require('../token.js');
+
 module.exports = function(db, app, sessionIds) {
+
   //* GET
   /**
    * Retrieves all posts.
@@ -88,6 +91,17 @@ module.exports = function(db, app, sessionIds) {
    */
   app.post('/api/posts', (req, res) => {
     const {content, user} = req.body;
+
+    //ADDED BY EBBA
+    // #TODO verify token  
+    //const {content, token} = req.body;
+    //const decodedToken = verifyToken(token);
+    //if (!decodedToken) {
+    //  return res.status(401).json({ error: 'Invalid token' });
+    //}
+    // If the user is authenticated, assign the token's userId to user.
+    //const user = decodedToken.userId;
+
 
     // Make sure that user exists.
     const sql = `

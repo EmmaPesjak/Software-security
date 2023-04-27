@@ -1,3 +1,5 @@
+//const { createToken } = require('../token.js');
+
 module.exports = function(db, app, crypto, sessionIds) {
   //* GET
   /**
@@ -53,12 +55,20 @@ module.exports = function(db, app, crypto, sessionIds) {
       } else if (!row) {
         res.status(404).json({"error": "The username or password is wrong."});
       } else {
-        sessionIds.set(userName, sha256(userName)); // TODO Generate random token.
+        sessionIds.set(userName, sha256(userName)); 
+
+        // TODO Generate random token from token.js file.
+        //const token = createToken(userId);  // ADDED BY EBBA
+
         const options = { // TODO Are there more options we should utilize?
           httpOnly: true, // Only the server can access the cookie.
           maxAge: 1000 * 60 * 60, // Expires after 1 hour.
         }
         // Assigns the user a session ID.
+
+        // TODO assign token????? xoxo ebba
+        //res.cookie('token', token, options);
+
         res.cookie('ID', sessionIds[userName], options);
         res.status(200).json(row);
       }
@@ -112,4 +122,8 @@ module.exports = function(db, app, crypto, sessionIds) {
     // Finalizes the prepared statement to release its resources.
     stmt.finalize();
   });
+
 }
+
+
+

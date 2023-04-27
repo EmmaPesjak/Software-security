@@ -12,11 +12,11 @@ module.exports = function(db, app, sessionIds) {
 
     // The SQL query to retrieve all posts..
     const sql = `
-    SELECT p.*, u.name,
+    SELECT p.*, u.username, u.name,
     (SELECT DISTINCT COUNT(l.user) FROM like AS l WHERE l.post = p.postId) AS likes,
     (SELECT DISTINCT COUNT(d.user) FROM dislike AS d WHERE d.post = p.postId) AS dislikes
-    FROM post AS p, user AS u
-    WHERE p.user = u.userId
+    FROM post AS p
+    INNER JOIN user AS u ON p.user = u.userId
     `;
 
     // Prepares the SQL statement.
@@ -46,8 +46,8 @@ module.exports = function(db, app, sessionIds) {
     // The SQL query to retrieve the specified user.
     //const sql = 'SELECT p.*, u.name FROM post AS p, user AS u WHERE postId = ? AND p.user = u.userId'
 
-    // Join likes and dislikes with post.
-    const sql = `SELECT p.*, u.name,
+    // Join username, likes and dislikes with post.
+    const sql = `SELECT p.*, u.username, u.name,
     COUNT(DISTINCT like.user) AS likes,
     COUNT(DISTINCT dislike.user) AS dislikes
     FROM post AS p

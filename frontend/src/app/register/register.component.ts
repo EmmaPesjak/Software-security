@@ -41,6 +41,13 @@ export class RegisterComponent {
    * user input is needed here.
    */
   addUser() {
+
+    // ADDED BY EBBA TO CHECK MATCH
+    if (this.password !== this.passwordRepeat) {
+      this.displayMessage("Passwords do not match");
+      return;
+    }
+
     let addUserPromise: Promise<User>;
 
     addUserPromise = this.backend.addUser({
@@ -82,6 +89,8 @@ export class RegisterComponent {
    */
   handleError(error: HttpErrorResponse) {
     console.error(`error adding user: ${error.status} ${error.statusText}`);
+
+    // MODIFIED BY EBBA
     const message: string = error.error.message;
     console.log(error);
     // Display the error message.

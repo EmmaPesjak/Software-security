@@ -1,6 +1,6 @@
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { firstValueFrom } from 'rxjs';
+import { Observable, firstValueFrom } from 'rxjs';
 import { Post } from './post';
 import { User } from './user';
 
@@ -13,20 +13,45 @@ import { User } from './user';
  * Class responsible for communication with the backend.
  */
 export class BackendService {
+  readonly API_URL: string = "http://localhost:3000"; // TODO: Correct url here!!!
+  userName: string = "";
 
-  readonly API_URL = "http://localhost:3000"; // TODO: Correct url here!!!
+  constructor(private http: HttpClient) {}
 
-  constructor(private http: HttpClient) { }
+  /**
+   * Logs in the specified user.
+   * @param userName The user's username.
+   * @returns A promise that resolves to a logged in user.
+   */
+  login(userName: string, password: string): Observable<any> {
+    const endpoint = this.API_URL + "/api/users/" + userName,
+    body = {
+      password: password,
+    },
+    options: {headers: any; observe: any; withCredentials: any} = {
+      headers: new HttpHeaders({
+        "Content-Type": "application/json",
+      }),
+      observe: "response",
+      withCredentials: true,
+    };
+    return this.http.post(endpoint, body, options);
+  }
 
   /**
    * Get all posts.
-   * @returns a Promise that resolves to an array of posts.
+   * @returns A promise that resolves to an array of posts.
    */
-  getPosts(): Promise<Post[]> {
-    const endpoint = this.API_URL + '/api/posts';
-    const responseObservable = this.http.get<Post[]>(endpoint);
-    const responsePromise = firstValueFrom(responseObservable);
-    return responsePromise;
+  getPosts(): Observable<any> {
+    const endpoint = this.API_URL + "/api/users/" + this.userName + "/posts",
+    options: {headers: any; observe: any; withCredentials: any} = {
+      headers: new HttpHeaders({
+        "Content-Type": "application/json",
+      }),
+      observe: "response",
+      withCredentials: true,
+    };
+    return this.http.get(endpoint, options);
   }
 
   /**

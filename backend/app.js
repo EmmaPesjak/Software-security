@@ -25,7 +25,7 @@ if (db) {
     // Creates an Express app.
     const app = express();
     // Enables CORS.
-    app.use(cors());
+    app.use(cors({origin: 'http://localhost:4200', credentials: true}));
     // Enables parsing of JSON requests
     // (puts the parsed data in `req.body`).
     app.use(express.json());

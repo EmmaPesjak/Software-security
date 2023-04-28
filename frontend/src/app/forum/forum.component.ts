@@ -17,7 +17,7 @@ export class ForumComponent {
   searchText: string = "";
 
   constructor(private backend: BackendService) {
-    this.posts = []; 
+    this.posts = [];
   }
 
   /**
@@ -31,11 +31,16 @@ export class ForumComponent {
    * Get the courses for the table element from the backend.
    */
   getPosts() {
-    this.backend.getPosts()
-      .then(posts => {
-        this.posts = posts;
-      })
-      .catch(error => console.error(`An error occurred getting all posts: ${error}`));
+    this.backend.getPosts().subscribe((response) => {
+      this.posts = response.body;
+      // TODO Implement error handling? See the original code below.
+    });
+    // this.backend.getPosts()
+    // .then((posts) => {
+    //   console.log(posts);
+    //   // this.posts = posts;
+    // })
+    // .catch((error) => console.error(`An error occurred getting all posts: ${error}`));
   }
 
   /**
@@ -60,9 +65,9 @@ export class ForumComponent {
 
         // Get the index of the post in the array.
         const postIndex = this.posts.findIndex(
-          
+
           postInArray => postInArray.postId == post.postId);
-        
+
 
         // Do nothing if the restaurant does not exist.
         if (postIndex == -1) {

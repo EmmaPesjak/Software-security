@@ -1,16 +1,16 @@
 <main>
-    <form>
-        <div class="container">
-          <label for="uname"><b>Username</b></label>
-          <input type="text" placeholder="Enter Username" name="uname" required>
-      
-          <label for="psw"><b>Password</b></label>
-          <input type="password" placeholder="Enter Password" name="psw" required>
-      
-          <!-- Just nu länkar denna bara till forumet!!! -->
-          <a routerLink="/forum" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}"><button type="submit" id="login">Log in</button></a>
+  <form>
+    <div class="container">
+      <label for="uname"><b>Username</b></label>
+      <input name="uname" [(ngModel)]="username" placeholder="Enter Username" type="text" required>
 
-          <a routerLink="/register" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}"><button type="button" id="register">Register</button></a>
-        </div>
-      </form>
+      <label for="psw"><b>Password</b></label>
+      <input name="psw" [(ngModel)]="password" placeholder="Enter Password" type="password" required>
+
+      <!-- <a routerLink="/forum" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}"><button id="login" type="submit">Log in</button></a> -->
+      <button (click)="login()" id="login" type="submit" >Log in</button>
+
+      <a routerLink="/register" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}"><button id="register" type="button">Register</button></a>
+    </div>
+  </form>
 </main>

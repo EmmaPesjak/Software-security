@@ -1,16 +1,15 @@
-//const { verifyToken } = require('../token.js');
+// const { verifyToken } = require('../token.js');
 
-module.exports = function(db, app, sessionIds) {
+module.exports = function(db, app, createToken, verifyToken, sessionIds) {
 
   //* GET
   /**
    * Retrieves all posts.
    */
-  app.get('/api/posts', (req, res) => {
-    const userName = req.body.userName;
+  app.get('/api/users/:userName/posts', (req, res) => {
+    const userName = req.params.userName;
 
-    console.log(req.cookies.ID);
-    console.log(sessionIds.get(userName));
+    // TODO Use `verifyToken` instead.
     if (!req.body.debug && (!sessionIds.has(userName) || req.cookies.ID !== sessionIds.get(userName))) return res.status(401).json({"error": "No active session."});
 
     // The SQL query to retrieve all posts..

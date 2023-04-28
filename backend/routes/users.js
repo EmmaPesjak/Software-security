@@ -1,6 +1,4 @@
-// const { createToken } = require('../token.js');
-
-module.exports = function(db, app, crypto, sessionIds) {
+module.exports = function(db, app, crypto, createToken, verifyToken, sessionIds) {
   //* GET
   /**
    * Retrieves all users.
@@ -55,18 +53,15 @@ module.exports = function(db, app, crypto, sessionIds) {
         // Assigns the user a session ID.
         sessionIds.set(userName, sha256(userName));
 
-        // TODO Generate random token from token.js file.
-        // const token = createToken(userId);  // ADDED BY EBBA
+        const token = createToken(userName);
+        console.log(token);
 
         const options = { // TODO Are there more options we should utilize?
           // httpOnly: true, // Only the server can access the cookie.
           maxAge: 1000 * 60 * 60, // Expires after 1 hour. // TODO How can expiration be handled? E.g., the frontend sends the user to the login page?
         }
 
-        // TODO assign token????? xoxo ebba
-        // res.cookie('token', token, options);
-
-        res.cookie('ID', sessionIds.get(userName), options);
+        res.cookie('ID', sessionIds.get(userName), options); // TODO Use `token` instead of `sessionIds.get(userName)`.
         res.status(200).json(row);
       }
     });

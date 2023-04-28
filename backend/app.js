@@ -5,7 +5,8 @@ cors = require('cors'),
 crypto = require('crypto'),
 cookieParser = require('cookie-parser'),
 users = require('./routes/users'),
-posts = require('./routes/posts');
+posts = require('./routes/posts'),
+token = require('./token.js');
 
 
 
@@ -42,9 +43,9 @@ if (db) {
 
     const sessionIds = new Map();
 
-    // Exports `db`, `app`, `crypto`, and `sessionIds`.
-    users(db, app, crypto, sessionIds);
-    posts(db, app, sessionIds);
+    // Exports `db`, `app`, `crypto`, `createToken`, `verifyToken`, and `sessionIds`.
+    users(db, app, crypto, token.createToken, token.verifyToken, sessionIds);
+    posts(db, app, token.createToken, token.verifyToken, sessionIds);
 }
 
 // // Closes the connection to the DB.

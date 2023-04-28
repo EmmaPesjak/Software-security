@@ -1,4 +1,7 @@
-const jwt = require('jsonwebtoken');
+const crypto = require('crypto'),
+jwt = require('jsonwebtoken');
+
+
 
 const secretKey = crypto.randomBytes(64).toString('hex');
 
@@ -13,7 +16,6 @@ function verifyToken(token) {
   return jwt.verify(token, secretKey);
 }
 
-module.exports = {
-  createToken,
-  verifyToken
-};
+
+
+module.exports = {createToken, verifyToken};

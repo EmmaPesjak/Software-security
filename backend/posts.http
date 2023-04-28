@@ -13,19 +13,18 @@ GET {{url}}/users
 
 // Test: Get all posts.
 // Expected HTTP response status code: 200.
-GET {{url}}/posts HTTP/1.1
+GET {{url}}/users/annaandersson/posts HTTP/1.1
 content-type: application/json
 
 {
-   "debug": true,
-   "userName": "annaandersson"
+   "debug": true
 }
 
 ###############################################
 
-// Test: Get a user that exists.
+// Test: Log in a user that exists.
 // Expected HTTP response status code: 200.
-GET {{url}}/users/annaandersson HTTP/1.1
+POST {{url}}/users/annaandersson HTTP/1.1
 content-type: application/json
 
 {
@@ -34,7 +33,7 @@ content-type: application/json
 
 ###############################################
 
-// Test: Get a user that does not exists
+// Test: Log in a user that does not exists
 // Expected HTTP response status code: 404.
 GET {{url}}/users/khurre HTTP/1.1
 content-type: application/json

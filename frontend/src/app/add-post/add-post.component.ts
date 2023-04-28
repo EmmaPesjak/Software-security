@@ -17,6 +17,7 @@ export class AddPostComponent {
   postId?: number;
   user: string;
   name: string;
+  userName: string;
   content: string;
 
   message: string | undefined;
@@ -28,6 +29,7 @@ export class AddPostComponent {
     this.postId = undefined;
     this.user = "";
     this.name = "";
+    this.userName = "";
     this.content = "";
     this.newPostEvent = new EventEmitter<Post>();
   }
@@ -44,6 +46,7 @@ export class AddPostComponent {
       postId: this.postId ?? 0,
       user: this.user,
       name: this.name,
+      userName: this.userName,
       content: this.content,
       likes: 0,
       dislikes: 0

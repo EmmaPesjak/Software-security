@@ -64,9 +64,9 @@ export class RegisterComponent {
     const containsUserName = this.password.toLowerCase().includes(this.userName.toLowerCase());
     const length = this.password.length;
 
-    // ADDED BY EBBA TO CHECK IF ANY ARE FALSE RESULTS
+    // ADDED BY EBBA TO CHECK IF ANY ARE FALSE RESULTS // EMMA FORMULERADE TEXTEN SNYGGARE
     if (!smallLetters || !bigLetters || !numbers || !specialChars || length < 12 || containsName || containsUserName){
-      this.displayMessage("Password must contain small letters, big letters, numbers, special symbols, and minimum length is 12 and cannot include your name or username.");
+      this.displayMessage("Your password must contain: lowercase letters, uppercase letters, numbers, special symbols, have a minimum length of 12 characters, and cannot include your name or username.");
       return;
     }
 
@@ -132,5 +132,15 @@ export class RegisterComponent {
       this.message = undefined; 
     },
       5000);
+  }
+
+  /**
+   * Displays an info window for password requirements when clicked.
+   */
+  showPwdInfo() {
+    var popup = document.getElementById("myPopup");
+    if (popup != null) {
+      popup.classList.toggle("show");
+    }
   }
 }

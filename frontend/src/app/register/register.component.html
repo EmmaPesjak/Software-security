@@ -12,7 +12,12 @@
             <label for="username"><b>Username</b></label>
             <input type="text" class="form-field" [(ngModel)]="userName" placeholder="Enter Username" name="username" id="username" required>
       
-            <label for="psw"><b>Password</b></label>
+            <label for="psw"><b>Password</b></label> 
+            <div class="popup" (click)="showPwdInfo()">?
+                <span class="popuptext" id="myPopup">Your password must contain:<br>&bull; Lowercase letters<br>&bull; Uppercase letters
+                    <br>&bull; Numbers<br>&bull; Special symbols<br>&bull; Have a minimum length of &nbsp;&nbsp;12 characters<br>&bull; Cannot include your name 
+                    &nbsp;&nbsp;or username.</span>
+            </div>
             <input type="password" class="form-field" [(ngModel)]="password" placeholder="Enter Password" name="psw" id="psw" required>
       
             <label for="psw-repeat"><b>Repeat Password</b></label>

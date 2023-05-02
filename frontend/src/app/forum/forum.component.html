@@ -20,9 +20,11 @@
             <div class="post_username">@{{ post.username }}</div>
             <div class="post_content">{{ post.content }}</div>
             
-            <div class="edit_box" *ngIf="showEditBox && postID === post.postId"> <!-- Göra detta till en child? -->
+            <!-- Satte det till currentPost istället för post === postID, för att kolla läget så att det är en
+            post som ska editas. -->
+            <div class="edit_box" *ngIf="showEditBox && currentPost"> <!-- Göra detta till en child? -->
                 <label>Edit content:<br>
-                    <textarea rows="5" cols="76" [(ngModel)]="content" name="content"></textarea> <!-- Lyckas inte lägga till default text(gamla content) här?-->
+                    <textarea rows="5" cols="76" [(ngModel)]="currentPost.content" name="content"></textarea> <!-- Lyckas inte lägga till default text(gamla content) här?-->
                   </label>&nbsp;<br>
                 <button type="button" (click)="submitEdit()">submit</button>
             </div> 
@@ -33,7 +35,9 @@
                 <button type="button" (click)="dislike(post)" class="dislike"><img id="thumb_down" src="assets/img/thumb_down.png" alt="thumbs down button"></button>
                 <p>{{ post.dislikes }}</p>
                 <button type="button" (click)="deletePost(post)" *ngIf="loggedinUser=== post.username" class="delete">Delete</button>
-                <button type="button" (click)="showEdit(post.postId)" *ngIf="loggedinUser=== post.username" class="edit">Edit</button>
+
+                <!-- Ändrat till showEdit(post) för att sätta current post för editing. -->
+                <button type="button" (click)="showEdit(post)" *ngIf="loggedinUser=== post.username" class="edit">Edit</button>
             </div>
         </div>
     </ng-container>

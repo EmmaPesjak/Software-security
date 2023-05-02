@@ -135,7 +135,20 @@ export class BackendService {
     return responsePromise;
   }
   
-  editPost() {
-    
+  /**
+   * Edit a post.
+   * @param post post with new content.
+   * @returns a Promise that resolves to edited post.
+   */
+  editPost(post: Post) {
+    const endpoint = this.API_URL + '/api/posts' + post.postId;
+    const body = {
+      content: post.content,
+      user: post.user
+    }
+
+    const responseObservable = this.http.patch<Post>(endpoint, body);
+    const responsePromise = firstValueFrom(responseObservable);
+    return responsePromise;
   }
 }

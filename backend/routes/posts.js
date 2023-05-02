@@ -89,7 +89,10 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds) {
    * Creates a post.
    */
   app.post('/api/posts', (req, res) => {
-    const {content, user} = req.body;
+    const {content, username} = req.body;
+
+    console.log(content);
+    console.log(username);
 
     //ADDED BY EBBA
     // #TODO verify token  
@@ -106,7 +109,7 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds) {
     const sql = `
     INSERT INTO post(content, user)
     SELECT ?, ?
-    WHERE EXISTS(SELECT userId FROM user WHERE userId = ?)
+    WHERE EXISTS(SELECT userId FROM user WHERE username = ?)
     RETURNING *
     `;
 
@@ -114,7 +117,7 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds) {
     const stmt = db.prepare(sql);
 
     // Binds the parameters to the prepared statement.
-    stmt.bind(content, user, user);
+    stmt.bind(content, username, username);
 
     // Executes the prepared statement and returns the result.
     stmt.get(function(err, result) {
@@ -124,6 +127,7 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds) {
       } else if (this.changes === 0) {
         res.status(400).send('User with specified ID does not exist');
       } else {
+        console.log(result);
         res.status(201).send(result);
       }
     });
@@ -158,7 +162,7 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds) {
       } else if (this.changes === 0) {
         res.status(400).send('User or post with specified ID does not exist');
       } else {
-        res.status(201).send('Like record created successfully');
+        res.status(201).send();
       }
     });
 
@@ -192,7 +196,7 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds) {
       } else if (this.changes === 0) {
         res.status(400).send('User or post with specified ID does not exist');
       } else {
-        res.status(201).send('Like record created successfully');
+        res.status(201).send();
       }
     });
 

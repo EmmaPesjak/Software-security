@@ -14,10 +14,6 @@ import { HttpErrorResponse } from "@angular/common/http";
  */
 export class AddPostComponent {
 
-  postId?: number;
-  user: string;
-  name: string;
-  userName: string;
   content: string;
 
   message: string | undefined;
@@ -26,10 +22,6 @@ export class AddPostComponent {
   @Output() newPostEvent: EventEmitter<Post>;
 
   constructor(private backend: BackendService) {
-    this.postId = undefined;
-    this.user = "";
-    this.name = "";
-    this.userName = "";
     this.content = "";
     this.newPostEvent = new EventEmitter<Post>();
   }
@@ -42,15 +34,7 @@ export class AddPostComponent {
   addPost() {
     let addPostPromise: Promise<Post>;
 
-    addPostPromise = this.backend.addPost({
-      postId: this.postId ?? 0,
-      user: this.user,
-      name: this.name,
-      userName: this.userName,
-      content: this.content,
-      likes: 0,
-      dislikes: 0
-    });
+    addPostPromise = this.backend.addPost(this.content);
 
     // Call the handle methods depending on the outcome of the promise.
     addPostPromise
@@ -64,14 +48,13 @@ export class AddPostComponent {
    */
   handleAddedPost(post: Post) {
 
+    console.log(post);
+
     // Clear user input.
-    this.postId = undefined;
-    this.user = "";
-    this.name = "";
     this.content = "";
 
     // Create and display a success message.
-    const message: string = `The post ${post.postId} was added`;
+    const message: string = `The post was added`;
     this.displayMessage(message);
 
     // Emit the post so that the parent component can update the list of posts.

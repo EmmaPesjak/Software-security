@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { BackendService } from '../backend.service';
 import { Post } from '../post';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-forum',
@@ -25,7 +26,7 @@ export class ForumComponent {
   // Current post for editing.
   currentPost : Post |undefined;
 
-  constructor(private backend: BackendService) {
+  constructor(private backend: BackendService, private router: Router) {
     this.content = "";
     this.posts = [];
     this.currentPost;
@@ -37,17 +38,28 @@ export class ForumComponent {
   ngOnInit(): void {
     this.loggedinUser = this.backend.getUsername();
     this.getPosts();
-    
   }
 
   /**
    * Get the courses for the table element from the backend.
    */
   getPosts() {
-    this.backend.getPosts().subscribe((response) => {
-      this.posts = response.body;
+
+    // Get posts. If there was an error, redirect to home.
+    this.backend.getPosts().subscribe(
+      (response) => {
+        this.posts = response.body;
+      },
+      (error) => {
+        console.log(error);
+        this.router.navigate(['']);
+      }
+    );
+    //In this example, the second argument is an error handling function that logs the error to the console. You can replace console.log(error) with your desired error handling code.
+    //this.backend.getPosts().subscribe((response) => {
+    //  this.posts = response.body;
       // TODO Implement error handling? See the original code below.
-    });
+    //});
     // this.backend.getPosts()
     // .then((posts) => {
     //   console.log(posts);

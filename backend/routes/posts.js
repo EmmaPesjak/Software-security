@@ -10,7 +10,16 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds) {
     const userName = req.params.userName;
 
     // TODO Use `verifyToken` instead.
-    if (!req.body.debug && (!sessionIds.has(userName) || req.cookies.ID !== sessionIds.get(userName))) return res.status(401).json({"error": "No active session."});
+    //if (!req.body.debug && (!sessionIds.has(userName) || req.cookies.ID !== sessionIds.get(userName))){
+    //  console.log("No logged in user");
+    //  return;
+    //} //return res.redirect('/');//return res.status(401).json({"error": "No active session."});
+    const token = req.cookies.token;
+    console.log(token);
+
+    if (!verifyToken(token)){
+      return res.status(401).json({"error": "No active session."});
+    }
 
     // The SQL query to retrieve all posts..
     const sql = `
@@ -338,4 +347,18 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds) {
     // Finalizes the prepared statement to release its resources.
     stmt.finalize();
   });
+
+
+  // Middleware function to check if the user is authenticated.
+  function requireAuth(req, res, next) {
+    const sessionId = req.cookies.ID; // Assuming the session ID is stored in a cookie called "ID".
+
+    if (sessionId && sessionIds.hasValue(sessionId)) {
+      // The user is authenticated. Allow the request to continue.
+      next();
+    } else {
+      // The user is not authenticated. Return a 401 Unauthorized response.
+      res.status(401).json({ error: 'Unauthorized' });
+    }
+  }
 }

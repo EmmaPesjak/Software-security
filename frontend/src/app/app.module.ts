@@ -1,14 +1,15 @@
-import { NgModule } from '@angular/core';
-import { BrowserModule } from '@angular/platform-browser';
 import { HttpClientModule } from '@angular/common/http';
+import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { BrowserModule } from '@angular/platform-browser';
 
+import { CookieService } from 'ngx-cookie-service';
+import { AddPostComponent } from './add-post/add-post.component';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { RegisterComponent } from './register/register.component';
 import { ForumComponent } from './forum/forum.component';
 import { HomeComponent } from './home/home.component';
-import { AddPostComponent } from './add-post/add-post.component';
+import { RegisterComponent } from './register/register.component';
 import { SearchComponent } from './search/search.component';
 
 @NgModule({
@@ -26,7 +27,7 @@ import { SearchComponent } from './search/search.component';
     AppRoutingModule,
     FormsModule
   ],
-  providers: [],
+  providers: [CookieService],
   bootstrap: [AppComponent]
 })
 

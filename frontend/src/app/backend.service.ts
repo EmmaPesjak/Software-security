@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { Observable, firstValueFrom } from 'rxjs';
 import { Post } from './post';
 import { User } from './user';
+import { CookieService } from 'ngx-cookie-service';
 
 // Allow the service to be visible in the entire app.
 @Injectable({
@@ -14,8 +15,8 @@ import { User } from './user';
  */
 export class BackendService {
   readonly API_URL: string = "http://localhost:3000"; // TODO: Correct url here!!!
-  userName: string = "";
-  constructor(private http: HttpClient) {}
+
+  constructor(private cookieService: CookieService, private http: HttpClient) {}
 
   /**
    * Logs in the specified user.
@@ -37,16 +38,12 @@ export class BackendService {
     return this.http.post(endpoint, body, options);
   }
 
-  getUsername() {
-    return this.userName;   //TODO: Får man göra så här? :)
-  }
-
   /**
    * Get all posts.
    * @returns A promise that resolves to an array of posts.
    */
   getPosts(): Observable<any> {
-    const endpoint = this.API_URL + "/api/users/" + this.userName + "/posts",
+    const endpoint = this.API_URL + "/api/users/" + this.cookieService.get('username') + "/posts",
     options: {headers: any; observe: any; withCredentials: any} = {
       headers: new HttpHeaders({
         "Content-Type": "application/json",
@@ -66,7 +63,7 @@ export class BackendService {
     const endpoint = this.API_URL + '/api/posts';
     const body = {
       content: contenthej,
-      username: this.userName,
+      username: this.cookieService.get('username'),
     };
     const responseObservable = this.http.post<Post>(endpoint, body);
     const responsePromise = firstValueFrom(responseObservable);
@@ -134,7 +131,7 @@ export class BackendService {
     const responsePromise = firstValueFrom(responseObservable);
     return responsePromise;
   }
-  
+
   /**
    * Edit a post.
    * @param post post with new content.

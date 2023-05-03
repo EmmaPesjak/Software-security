@@ -1,7 +1,8 @@
 import { Component } from '@angular/core';
+import { Router } from '@angular/router';
+import { CookieService } from 'ngx-cookie-service';
 import { BackendService } from '../backend.service';
 import { Post } from '../post';
-import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-forum',
@@ -26,7 +27,7 @@ export class ForumComponent {
   // Current post for editing.
   currentPost : Post |undefined;
 
-  constructor(private backend: BackendService, private router: Router) {
+  constructor(private backend: BackendService, private cookieService: CookieService, private router: Router) {
     this.content = "";
     this.posts = [];
     this.currentPost;
@@ -36,7 +37,7 @@ export class ForumComponent {
    * Get the posts on init.
    */
   ngOnInit(): void {
-    this.loggedinUser = this.backend.getUsername();
+    this.loggedinUser = this.cookieService.get('username');
     this.getPosts();
   }
 
@@ -163,4 +164,10 @@ export class ForumComponent {
   }
 
   //TODO: obs! just nu kan man likea/dislikea hur som helst!
+
+  logout(): void {
+    this.cookieService.delete('numberOfLoginAttemps');
+    this.cookieService.delete('username');
+    this.router.navigate(['/']);
+  }
 }

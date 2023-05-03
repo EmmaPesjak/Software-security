@@ -143,10 +143,7 @@ export class BackendService {
       content: post.content,
       user: post.user  
     }
-
-    console.log("content innan skickar in: " + post.content);
     
-
     const responseObservable = this.http.patch<Post>(endpoint, body);
     const responsePromise = firstValueFrom(responseObservable);
     return responsePromise;

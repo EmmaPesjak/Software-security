@@ -53,10 +53,7 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds) {
   app.get('/api/posts/:postId', (req, res) => {
     const postId = req.params.postId;
 
-    // The SQL query to retrieve the specified user.
-    //const sql = 'SELECT p.*, u.name FROM post AS p, user AS u WHERE postId = ? AND p.user = u.userId'
-
-    // Join username, likes and dislikes with post.
+    // The SQL query to retrieve the specified post. Join username, likes, and dislikes with post.
     const sql = `SELECT p.*, u.username, u.name,
     COUNT(DISTINCT like.user) AS likes,
     COUNT(DISTINCT dislike.user) AS dislikes
@@ -67,8 +64,6 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds) {
     WHERE p.postId = ?
     GROUP BY p.postId
     `;
-
-    //const sql = 'SELECT * FROM post WHERE postId = ?';
 
     // Prepares the SQL statement.
     let stmt = db.prepare(sql);
@@ -213,23 +208,12 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds) {
    * Updates the specified post.
    */
   app.patch('/api/posts/:postId', (req, res) => {
-    //const postId = req.params.postId,
-    //{content, user} = req.body;
-
-
     const postId = req.params.postId;
     const user = req.body.user;  // userID
     const content = req.body.content;
 
-
     // The SQL query to update the specified post.
-    //const sql = 'UPDATE post SET content = ? WHERE postId = ?';
     const sql = 'UPDATE post SET content = ? WHERE postId = ? AND user = ?';
-
-    // The SQL query to update the specified post.
-    //const sql = 
-    //`UPDATE post SET content = ? WHERE postId = ? AND user = (SELECT userId FROM user WHERE user = ?)`;
-
   
     // Prepares the SQL statement.
     const stmt = db.prepare(sql);

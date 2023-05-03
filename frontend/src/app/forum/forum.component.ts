@@ -31,7 +31,6 @@ export class ForumComponent {
   constructor(private backend: BackendService, private cookieService: CookieService, private router: Router) {
     this.content = "";
     this.posts = [];
-    //this.currentPost;
   }
 
   /**
@@ -78,6 +77,12 @@ export class ForumComponent {
     this.searchText = searchValue;
   }
 
+  // #TODO the view only updates the content, but not the other associated info to post. getPost???
+  onNewPost(newPost: Post) {
+    // Update the list of posts with the new post
+    this.posts.push(newPost);
+  }
+
   /**
    * Method for showing the add post component.
    * The showAddBox boolean is set to true to make the child visible.
@@ -110,8 +115,6 @@ export class ForumComponent {
 
     // find the index of the post being edited using currentPostId
     const index = this.posts.findIndex(post => post.postId === this.currentPostId);
-    console.log("index: " + index);
-    console.log("content innan: " +this.content);
 
     // update the content of the post at that index
     if (index !== -1) {

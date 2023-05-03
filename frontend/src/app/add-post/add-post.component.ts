@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, Output} from '@angular/core';
 import { BackendService } from '../backend.service';
 import { Post } from '../post';
 import { HttpErrorResponse } from "@angular/common/http";
@@ -59,6 +59,7 @@ export class AddPostComponent {
 
     // Emit the post so that the parent component can update the list of posts.
     this.newPostEvent.emit(post)
+
   }
 
   /**

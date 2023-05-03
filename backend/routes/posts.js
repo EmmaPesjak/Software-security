@@ -14,12 +14,11 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds) {
     //  console.log("No logged in user");
     //  return;
     //} //return res.redirect('/');//return res.status(401).json({"error": "No active session."});
-    const token = req.cookies.token;
-    console.log(token);
+    //const token = req.cookies.token;
 
-    if (!verifyToken(token)){
-      return res.status(401).json({"error": "No active session."});
-    }
+    //if (!verifyToken(token)){
+    //  return res.status(401).json({"error": "No active session."});
+    //}
 
     // The SQL query to retrieve all posts..
     const sql = `
@@ -100,10 +99,6 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds) {
   app.post('/api/posts', (req, res) => {
     const {content, username} = req.body;
 
-    console.log(content);
-    console.log(username);
-
-    //ADDED BY EBBA
     // #TODO verify token  
     //const {content, token} = req.body;
     //const decodedToken = verifyToken(token);
@@ -114,10 +109,10 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds) {
     //const user = decodedToken.userId;
 
 
-    // Make sure that user exists.
+    // Make sure that user exists and connect the post to the userID.
     const sql = `
     INSERT INTO post(content, user)
-    SELECT ?, (SELECT userId FROM user Where username = ?)
+    SELECT ?, (SELECT userId FROM user WHERE username = ?)
     WHERE EXISTS(SELECT userId FROM user WHERE username = ?)
     RETURNING *
     `;
@@ -218,19 +213,29 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds) {
    * Updates the specified post.
    */
   app.patch('/api/posts/:postId', (req, res) => {
-    const postId = req.params.postId,
-    {content, user} = req.body;
+    //const postId = req.params.postId,
+    //{content, user} = req.body;
 
-    console.log(content);
+
+    const postId = req.params.postId;
+    const user = req.body.user;  // userID
+    const content = req.body.content;
+
 
     // The SQL query to update the specified post.
-    const sql = 'UPDATE post SET content = ? WHERE postId = ?';
+    //const sql = 'UPDATE post SET content = ? WHERE postId = ?';
+    const sql = 'UPDATE post SET content = ? WHERE postId = ? AND user = ?';
 
+    // The SQL query to update the specified post.
+    //const sql = 
+    //`UPDATE post SET content = ? WHERE postId = ? AND user = (SELECT userId FROM user WHERE user = ?)`;
+
+  
     // Prepares the SQL statement.
     const stmt = db.prepare(sql);
 
     // Binds the parameters to the prepared statement.
-    stmt.bind(content, postId);
+    stmt.bind(content, postId, user);
 
     // Executes the prepared statement and returns the result.
     stmt.run(function(err) {

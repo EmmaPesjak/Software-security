@@ -141,10 +141,11 @@ export class BackendService {
     const endpoint = this.API_URL + '/api/posts/' + post.postId;
     const body = {
       content: post.content,
-      user: post.user
+      user: post.user  
     }
 
-    console.log(post.content);
+    console.log("content innan skickar in: " + post.content);
+    
 
     const responseObservable = this.http.patch<Post>(endpoint, body);
     const responsePromise = firstValueFrom(responseObservable);

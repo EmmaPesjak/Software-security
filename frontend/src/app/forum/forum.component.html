@@ -21,10 +21,12 @@
             <div class="post_content">{{ post.content }}</div>
             
             <!-- Satte det till currentPost istället för post === postID, för att kolla läget så att det är en
-            post som ska editas. -->
-            <div class="edit_box" *ngIf="showEditBox && currentPost"> <!-- Göra detta till en child? -->
+            post som ska editas. Före: *ngIf="showEditBox && currentPost" -->
+
+            <div class="edit_box" *ngIf="showEditBox && post.postId === currentPostId" > <!-- Göra detta till en child? -->
                 <label>Edit content:<br>
-                    <textarea rows="5" cols="76" [(ngModel)]="currentPost.content" name="content"></textarea> <!-- Lyckas inte lägga till default text(gamla content) här?-->
+                    <!--<textarea rows="5" cols="76" [(ngModel)]="post.content" name="content"></textarea>--> <!-- Lyckas inte lägga till default text(gamla content) här?-->
+                    <input class="form-field" [(ngModel)]="content" name="content" required/>
                   </label>&nbsp;<br>
                 <button type="button" (click)="submitEdit()">submit</button>
             </div> 

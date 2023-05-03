@@ -62,6 +62,8 @@ module.exports = function(db, app, crypto, createToken, verifyToken, sessionIds)
         }
 
         res.cookie('ID', sessionIds.get(userName), options); // TODO Use `token` instead of `sessionIds.get(userName)`.
+
+        res.cookie('token', token, options);
         res.status(200).json(row);
       }
     });

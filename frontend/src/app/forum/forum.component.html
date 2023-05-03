@@ -1,21 +1,21 @@
 <main>
     <div class="top_container">
         <app-search (searchTextChanged)="onSearchTextChanged($event)"></app-search>
-    
+
         <!-- Just nu länkar denna bara tillbaka till index page!!! -->
-        <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}"><button type="button" id="logout">Log out</button></a>
-        
+        <button (click)="logout()" id="logout" type="button">Log out</button>
+
         <button type="button" (click)="showAdd()">Add post</button>
     </div>
 
     <!-- Displays a child component to add a forum post if the boolean is true. -->
     <div class="add_box" *ngIf="showAddBox">
         <app-add-post></app-add-post>
-    </div> 
-    
+    </div>
+
     <ng-container *ngFor="let post of posts">
         <div class="forum_post" *ngIf="searchText === '' || post.content.toLowerCase().includes(searchText.toLowerCase()) || post.name.toLowerCase().includes(searchText.toLowerCase())">
-            
+
             <div class="post_name"><b>{{ post.name }}</b></div>
             <div class="post_username"><b>{{ post.userName }}</b></div>
             <div class="post_content">{{ post.content }}</div>

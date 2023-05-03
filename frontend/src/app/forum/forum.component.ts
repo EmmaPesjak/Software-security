@@ -1,4 +1,6 @@
 import { Component } from '@angular/core';
+import { Router } from '@angular/router';
+import { CookieService } from 'ngx-cookie-service';
 import { BackendService } from '../backend.service';
 import { Post } from '../post';
 
@@ -16,7 +18,7 @@ export class ForumComponent {
 
   searchText: string = "";
 
-  constructor(private backend: BackendService) {
+  constructor(private backend: BackendService, private cookieService: CookieService, private router: Router) {
     this.posts = [];
   }
 
@@ -78,5 +80,11 @@ export class ForumComponent {
         this.posts.splice(postIndex, 1);
       })
       .catch(error => console.error(`An error occurred when deleting the post: ${error}`));
+  }
+
+  logout(): void {
+    this.cookieService.delete('numberOfLoginAttemps');
+    this.cookieService.delete('username');
+    this.router.navigate(['/']);
   }
 }

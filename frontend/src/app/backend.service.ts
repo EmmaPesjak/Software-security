@@ -38,7 +38,7 @@ export class BackendService {
   }
 
   getUsername() {
-    return this.userName;
+    return this.userName;   //TODO: Får man göra så här? :)
   }
 
   /**
@@ -141,11 +141,13 @@ export class BackendService {
    * @returns a Promise that resolves to edited post.
    */
   editPost(post: Post) {
-    const endpoint = this.API_URL + '/api/posts' + post.postId;
+    const endpoint = this.API_URL + '/api/posts/' + post.postId;
     const body = {
       content: post.content,
       user: post.user
     }
+
+    console.log(post.content);
 
     const responseObservable = this.http.patch<Post>(endpoint, body);
     const responsePromise = firstValueFrom(responseObservable);

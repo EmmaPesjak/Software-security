@@ -117,7 +117,7 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds) {
     // Make sure that user exists.
     const sql = `
     INSERT INTO post(content, user)
-    SELECT ?, ?
+    SELECT ?, (SELECT userId FROM user Where username = ?)
     WHERE EXISTS(SELECT userId FROM user WHERE username = ?)
     RETURNING *
     `;
@@ -221,6 +221,8 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds) {
     const postId = req.params.postId,
     {content, user} = req.body;
 
+    console.log(content);
+
     // The SQL query to update the specified post.
     const sql = 'UPDATE post SET content = ? WHERE postId = ?';
 
@@ -238,7 +240,7 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds) {
       } else if (this.changes === 0) {
         res.status(404).send('Post with specified ID not found');
       } else {
-        res.status(200).send('Post updated successfully');
+        res.status(200).send();
       }
     });
 

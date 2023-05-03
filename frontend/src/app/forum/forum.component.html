@@ -17,16 +17,27 @@
         <div class="forum_post" *ngIf="searchText === '' || post.content.toLowerCase().includes(searchText.toLowerCase()) || post.name.toLowerCase().includes(searchText.toLowerCase())">
 
             <div class="post_name"><b>{{ post.name }}</b></div>
-            <div class="post_username"><b>{{ post.userName }}</b></div>
+            <div class="post_username">@{{ post.username }}</div>
             <div class="post_content">{{ post.content }}</div>
-            <div class="post_btns">
-                <!-- HÄR GÖR INGA KNAPPAR RÄTT!!! -->
-                <button type="button" class="like"><img id="thumb_up" src="assets/img/thumb_up.png" alt="thumbs up button"></button>
+            
+            <!-- Satte det till currentPost istället för post === postID, för att kolla läget så att det är en
+            post som ska editas. -->
+            <div class="edit_box" *ngIf="showEditBox && currentPost"> <!-- Göra detta till en child? -->
+                <label>Edit content:<br>
+                    <textarea rows="5" cols="76" [(ngModel)]="currentPost.content" name="content"></textarea> <!-- Lyckas inte lägga till default text(gamla content) här?-->
+                  </label>&nbsp;<br>
+                <button type="button" (click)="submitEdit()">submit</button>
+            </div> 
+
+            <div class="post_btns" *ngIf="!showEditBox">
+                <button type="button" (click)="like(post)" class="like"><img id="thumb_up" src="assets/img/thumb_up.png" alt="thumbs up button"></button>
                 <p>{{ post.likes }}</p>
-                <button type="button" class="dislike"><img id="thumb_down" src="assets/img/thumb_down.png" alt="thumbs down button"></button>
+                <button type="button" (click)="dislike(post)" class="dislike"><img id="thumb_down" src="assets/img/thumb_down.png" alt="thumbs down button"></button>
                 <p>{{ post.dislikes }}</p>
-                <button type="button" (click)="deletePost(post)" class="delete">Delete</button><!-- HÄR FÅR MAN LÄGGA TILL EN *ngIf username!!! -->
-                <button type="button" class="edit">Edit</button><!-- HÄR FÅR MAN FIXA ATT DET POPPAR UPP EN EDIT RUTA!!! -->
+                <button type="button" (click)="deletePost(post)" *ngIf="loggedinUser=== post.username" class="delete">Delete</button>
+
+                <!-- Ändrat till showEdit(post) för att sätta current post för editing. -->
+                <button type="button" (click)="showEdit(post)" *ngIf="loggedinUser=== post.username" class="edit">Edit</button>
             </div>
         </div>
     </ng-container>

@@ -77,7 +77,7 @@ content-type: application/json
 
 {
    "content": "Test test",
-   "user": 3
+   "username": "mariakarlsson"
 }
 
 ###############################################

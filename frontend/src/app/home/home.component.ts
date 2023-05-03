@@ -23,6 +23,7 @@ export class HomeComponent {
       } else {
         this.cookieService.set('numberOfLoginAttemps', '1');
       }
+      // console.log(parseInt(this.cookieService.get('numberOfLoginAttemps')));
       this.backend.login(this.username, this.password).subscribe((response) => {
         this.cookieService.set('username', response.body.username); // TODO Extract the user from `response`, not just the username.
         this.router.navigate(['/forum']);

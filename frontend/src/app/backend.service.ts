@@ -59,11 +59,11 @@ export class BackendService {
    * @param post is the post with all its attributes to add.
    * @returns a Promise that resolves to an added post.
    */
-  addPost(post: Post) {
+  addPost(contenthej: string) {
     const endpoint = this.API_URL + '/api/posts';
     const body = {
-      user: post.user,
-      content: post.content
+      content: contenthej,
+      username: this.cookieService.get('username'),
     };
     const responseObservable = this.http.post<Post>(endpoint, body);
     const responsePromise = firstValueFrom(responseObservable);
@@ -72,12 +72,44 @@ export class BackendService {
 
   /**
    * Delete a specific post.
-   * @param postId is the ID of the post to delete.
+   * @param post is the post to delete.
    * @returns a Promise that resolves to the deleted post.
    */
   deletePost(post: Post) {
     const endpoint = this.API_URL + '/api/posts/' + post.postId;
     const responseObservable = this.http.delete<Post>(endpoint);
+    const responsePromise = firstValueFrom(responseObservable);
+    return responsePromise;
+  }
+
+  /**
+   * Likes a specific post.
+   * @param post is the post to like.
+   * @returns a Promise that resolves to the liked post.
+   */
+  likePost(post: Post) {
+    const endpoint = this.API_URL + '/api/posts/like/' + post.postId;
+    const body = {
+      postId: post.postId,
+      user: post.user
+    };
+    const responseObservable = this.http.post<Post>(endpoint, body);
+    const responsePromise = firstValueFrom(responseObservable);
+    return responsePromise;
+  }
+
+  /**
+   * Dislikes a specific post.
+   * @param post is the post to dislike.
+   * @returns a Promise that resolves to the disliked post.
+   */
+  dislikePost(post: Post) {
+    const endpoint = this.API_URL + '/api/posts/dislike/' + post.postId;
+    const body = {
+      postId: post.postId,
+      user: post.user
+    };
+    const responseObservable = this.http.post<Post>(endpoint, body);
     const responsePromise = firstValueFrom(responseObservable);
     return responsePromise;
   }
@@ -100,8 +132,22 @@ export class BackendService {
     return responsePromise;
   }
 
-  // TODO: POST like
-  // TODO: POST dislike
-  // TODO: login?
-  // TODO: PUT (update) post/messsage (om vi satsar på A)
+  /**
+   * Edit a post.
+   * @param post post with new content.
+   * @returns a Promise that resolves to edited post.
+   */
+  editPost(post: Post) {
+    const endpoint = this.API_URL + '/api/posts/' + post.postId;
+    const body = {
+      content: post.content,
+      user: post.user
+    }
+
+    console.log(post.content);
+
+    const responseObservable = this.http.patch<Post>(endpoint, body);
+    const responsePromise = firstValueFrom(responseObservable);
+    return responsePromise;
+  }
 }

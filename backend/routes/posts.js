@@ -10,7 +10,16 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds) {
     const userName = req.params.userName;
 
     // TODO Use `verifyToken` instead.
-    if (!req.body.debug && (!sessionIds.has(userName) || req.cookies.ID !== sessionIds.get(userName))) return res.status(401).json({"error": "No active session."});
+    //if (!req.body.debug && (!sessionIds.has(userName) || req.cookies.ID !== sessionIds.get(userName))){
+    //  console.log("No logged in user");
+    //  return;
+    //} //return res.redirect('/');//return res.status(401).json({"error": "No active session."});
+    const token = req.cookies.token;
+    console.log(token);
+
+    if (!verifyToken(token)){
+      return res.status(401).json({"error": "No active session."});
+    }
 
     // The SQL query to retrieve all posts..
     const sql = `
@@ -89,7 +98,10 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds) {
    * Creates a post.
    */
   app.post('/api/posts', (req, res) => {
-    const {content, user} = req.body;
+    const {content, username} = req.body;
+
+    console.log(content);
+    console.log(username);
 
     //ADDED BY EBBA
     // #TODO verify token  
@@ -105,8 +117,8 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds) {
     // Make sure that user exists.
     const sql = `
     INSERT INTO post(content, user)
-    SELECT ?, ?
-    WHERE EXISTS(SELECT userId FROM user WHERE userId = ?)
+    SELECT ?, (SELECT userId FROM user Where username = ?)
+    WHERE EXISTS(SELECT userId FROM user WHERE username = ?)
     RETURNING *
     `;
 
@@ -114,7 +126,7 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds) {
     const stmt = db.prepare(sql);
 
     // Binds the parameters to the prepared statement.
-    stmt.bind(content, user, user);
+    stmt.bind(content, username, username);
 
     // Executes the prepared statement and returns the result.
     stmt.get(function(err, result) {
@@ -124,6 +136,7 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds) {
       } else if (this.changes === 0) {
         res.status(400).send('User with specified ID does not exist');
       } else {
+        console.log(result);
         res.status(201).send(result);
       }
     });
@@ -158,7 +171,7 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds) {
       } else if (this.changes === 0) {
         res.status(400).send('User or post with specified ID does not exist');
       } else {
-        res.status(201).send('Like record created successfully');
+        res.status(201).send();
       }
     });
 
@@ -192,7 +205,7 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds) {
       } else if (this.changes === 0) {
         res.status(400).send('User or post with specified ID does not exist');
       } else {
-        res.status(201).send('Like record created successfully');
+        res.status(201).send();
       }
     });
 
@@ -207,6 +220,8 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds) {
   app.patch('/api/posts/:postId', (req, res) => {
     const postId = req.params.postId,
     {content, user} = req.body;
+
+    console.log(content);
 
     // The SQL query to update the specified post.
     const sql = 'UPDATE post SET content = ? WHERE postId = ?';
@@ -225,7 +240,7 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds) {
       } else if (this.changes === 0) {
         res.status(404).send('Post with specified ID not found');
       } else {
-        res.status(200).send('Post updated successfully');
+        res.status(200).send();
       }
     });
 
@@ -334,4 +349,18 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds) {
     // Finalizes the prepared statement to release its resources.
     stmt.finalize();
   });
+
+
+  // Middleware function to check if the user is authenticated.
+  function requireAuth(req, res, next) {
+    const sessionId = req.cookies.ID; // Assuming the session ID is stored in a cookie called "ID".
+
+    if (sessionId && sessionIds.hasValue(sessionId)) {
+      // The user is authenticated. Allow the request to continue.
+      next();
+    } else {
+      // The user is not authenticated. Return a 401 Unauthorized response.
+      res.status(401).json({ error: 'Unauthorized' });
+    }
+  }
 }

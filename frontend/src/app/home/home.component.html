@@ -7,7 +7,8 @@
       <label for="psw"><b>Password</b></label>
       <input name="psw" [(ngModel)]="password" placeholder="Enter Password" type="password" required>
 
-      <!-- <a routerLink="/forum" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}"><button id="login" type="submit">Log in</button></a> -->
+      <p *ngIf="message.length > 0">{{message}}</p>
+
       <button (click)="login()" id="login" type="submit" >Log in</button>
 
       <a routerLink="/register" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}"><button id="register" type="button">Register</button></a>

@@ -8,26 +8,36 @@ import { CookieService } from 'ngx-cookie-service';
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css']
 })
-
 export class HomeComponent {
   username: string = '';
   password: string = '';
+  message: string;
 
-  constructor(private backend: BackendService, private cookieService: CookieService, private router: Router) {}
+  constructor(private backend: BackendService, private cookieService: CookieService, private router: Router) {
+    if (this.cookieService.check('numberOfLoginAttemps')) {
+      this.message = 'Number of login attempts: ' + parseInt(this.cookieService.get('numberOfLoginAttemps')) + '/5.';
+    } else {
+      this.message = 'Number of login attempts: ' + 0 + '/5.';
+    }
+  }
 
   login(): void {
     if (this.username.length > 0 && this.password.length > 0) {
       if (this.cookieService.check('numberOfLoginAttemps')) {
-        // Emma disablade detta så länge för hon låste ute sig :) kommer säkert glömma enabla igen.
-        //if (parseInt(this.cookieService.get('numberOfLoginAttemps')) >= 5) return; 
+        if (parseInt(this.cookieService.get('numberOfLoginAttemps')) >= 5) {
+          this.message = 'You\'ve exceeded the maximum number of login attempts.';
+          return;
+        }
         this.cookieService.set('numberOfLoginAttemps', (parseInt(this.cookieService.get('numberOfLoginAttemps')) + 1).toString());
       } else {
         this.cookieService.set('numberOfLoginAttemps', '1');
       }
-      // console.log(parseInt(this.cookieService.get('numberOfLoginAttemps')));
-      this.backend.login(this.username, this.password).subscribe((response) => {
-        this.cookieService.set('username', response.body.username); // TODO Extract the user from `response`, not just the username.
+      this.message = 'Number of login attempts: ' + parseInt(this.cookieService.get('numberOfLoginAttemps')) + '/5.';
+      this.backend.login(this.username, this.password).subscribe((data) => {
+        this.cookieService.set('username', data.body.username); // TODO Extract the user from `response`, not just the username.
         this.router.navigate(['/forum']);
+      }, (exception) => {
+        this.message = exception.error;
       });
     }
   }

@@ -15,8 +15,6 @@ export class ForumComponent {
   posts: Post[];
 
   showAddBox = false;
-  showEditBox = false;
-  //postID = -1;
 
   searchText: string = "";
 
@@ -81,6 +79,7 @@ export class ForumComponent {
   onNewPost(newPost: Post) {
     // Update the list of posts with the new post
     this.posts.push(newPost);
+    this.getPosts();
   }
 
   /**
@@ -88,15 +87,17 @@ export class ForumComponent {
    * The showAddBox boolean is set to true to make the child visible.
    */
   showAdd() {
-    this.showAddBox = true;
+    if (this.showAddBox) {
+      this.showAddBox = false;
+    } else {
+      this.showAddBox = true;
+    }    
   }
 
   /**
    * Method for showing the edit post box.
-   * The showAddBox boolean is set to true to make the box visible.
    */
   showEdit(post: Post) {
-    this.showEditBox = true;
 
     // Set current post to the one to be edited.
     //this.currentPost = post;
@@ -107,21 +108,16 @@ export class ForumComponent {
    * Edit a post.
    */
   submitEdit() {
-    // Här får man ju lägga till så att det faktiskt submittar
-    this.showEditBox = false;
 
-    // Fattar inte men ok tjena mvh Ebba
-    //this.postID = -1;
-
-    // find the index of the post being edited using currentPostId
+    // Find the index of the post being edited using currentPostId.
     const index = this.posts.findIndex(post => post.postId === this.currentPostId);
 
-    // update the content of the post at that index
+    // Update the content of the post at that index.
     if (index !== -1) {
       this.posts[index].content = this.content;
 
 
-      // call the backend service to update the post in the database
+      // Call the backend service to update the post in the database.
       this.backend.editPost(this.posts[index])
         .then(() => {
           this.getPosts();
@@ -129,8 +125,10 @@ export class ForumComponent {
         .catch(error => console.error(`An error occurred when editing the post: ${error}`));
     }
 
-    // reset the currentPostId
+    // Reset the currentPostId.
     this.currentPostId = -1;
+    // Reset content.
+    this.content = "";
   }
 
   /**

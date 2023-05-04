@@ -18,7 +18,8 @@ export class HomeComponent {
   login(): void {
     if (this.username.length > 0 && this.password.length > 0) {
       if (this.cookieService.check('numberOfLoginAttemps')) {
-        if (parseInt(this.cookieService.get('numberOfLoginAttemps')) >= 5) return;
+        // Emma disablade detta så länge för hon låste ute sig :) kommer säkert glömma enabla igen.
+        //if (parseInt(this.cookieService.get('numberOfLoginAttemps')) >= 5) return; 
         this.cookieService.set('numberOfLoginAttemps', (parseInt(this.cookieService.get('numberOfLoginAttemps')) + 1).toString());
       } else {
         this.cookieService.set('numberOfLoginAttemps', '1');

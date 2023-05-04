@@ -126,7 +126,6 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds) {
       } else if (this.changes === 0) {
         res.status(400).send('User with specified ID does not exist');
       } else {
-        console.log(result);
         res.status(201).send(result);
       }
     });

@@ -34,6 +34,12 @@ if (db) {
     // Enables parsing of cookies.
     app.use(cookieParser());
 
+    // Add no-store to cache-control to prevent sensitive data and updates to be cached.
+    app.use('/api', (req, res, next) => {
+        res.setHeader('Cache-Control', 'no-store');
+        next();
+      });
+
     // The port utilized by the server.
     const port = process.env.PORT || 3000;
     // Starts the server.

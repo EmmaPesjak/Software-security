@@ -16,7 +16,7 @@ export class ForumComponent {
 
   showAddBox = false;
   showEditBox = false;
-  postID = -1;
+  //postID = -1;
 
   searchText: string = "";
 
@@ -25,12 +25,12 @@ export class ForumComponent {
   content: string;
 
   // Current post for editing.
-  currentPost : Post |undefined;
+  //currentPost : Post |undefined;
+  currentPostId = -1;
 
   constructor(private backend: BackendService, private cookieService: CookieService, private router: Router) {
     this.content = "";
     this.posts = [];
-    this.currentPost;
   }
 
   /**
@@ -77,6 +77,12 @@ export class ForumComponent {
     this.searchText = searchValue;
   }
 
+  // #TODO the view only updates the content, but not the other associated info to post. getPost???
+  onNewPost(newPost: Post) {
+    // Update the list of posts with the new post
+    this.posts.push(newPost);
+  }
+
   /**
    * Method for showing the add post component.
    * The showAddBox boolean is set to true to make the child visible.
@@ -93,7 +99,8 @@ export class ForumComponent {
     this.showEditBox = true;
 
     // Set current post to the one to be edited.
-    this.currentPost = post;
+    //this.currentPost = post;
+    this.currentPostId = post.postId;
   }
 
   /**
@@ -104,17 +111,26 @@ export class ForumComponent {
     this.showEditBox = false;
 
     // Fattar inte men ok tjena mvh Ebba
-    this.postID = -1;
+    //this.postID = -1;
 
-    // If there is a current post, assign new content to post.
-    if (this.currentPost){
-      this.currentPost.content = this.content;
-      this.backend.editPost(this.currentPost)
-      .then(() => {
-        this.getPosts();
-      })
-      .catch(error => console.error(`An error occurred when editing the post: ${error}`));
+    // find the index of the post being edited using currentPostId
+    const index = this.posts.findIndex(post => post.postId === this.currentPostId);
+
+    // update the content of the post at that index
+    if (index !== -1) {
+      this.posts[index].content = this.content;
+
+
+      // call the backend service to update the post in the database
+      this.backend.editPost(this.posts[index])
+        .then(() => {
+          this.getPosts();
+        })
+        .catch(error => console.error(`An error occurred when editing the post: ${error}`));
     }
+
+    // reset the currentPostId
+    this.currentPostId = -1;
   }
 
   /**

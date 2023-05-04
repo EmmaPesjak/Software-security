@@ -53,8 +53,7 @@ module.exports = function(db, app, crypto, createToken, verifyToken, sessionIds)
         // Assigns the user a session ID.
         sessionIds.set(userName, sha256(userName));
 
-        const token = createToken(userName);
-        console.log(token);
+        //const token = createToken(userName);
 
         const options = { // TODO Are there more options we should utilize?
           // httpOnly: true, // Only the server can access the cookie.
@@ -63,7 +62,7 @@ module.exports = function(db, app, crypto, createToken, verifyToken, sessionIds)
 
         res.cookie('ID', sessionIds.get(userName), options); // TODO Use `token` instead of `sessionIds.get(userName)`.
 
-        res.cookie('token', token, options);
+        //res.cookie('token', token, options);
         res.status(200).json(row);
       }
     });

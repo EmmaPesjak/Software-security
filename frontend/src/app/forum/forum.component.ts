@@ -39,7 +39,8 @@ export class ForumComponent {
   ngOnInit(): void {
     this.loggedinUser = this.cookieService.get('username');
     this.getPosts();
-    //this.getLikedPosts();  // #TODO KIRRA FORFEN
+    this.getLikedPosts();  // #TODO KIRRA FORFEN
+    this.mapPosts();
   }
 
   /**
@@ -78,16 +79,6 @@ export class ForumComponent {
     this.backend.getLikedPosts().subscribe(
       (response) => {
         this.likedPosts = response.body;
-
-        this.posts.forEach(post => {
-          // Check if the post is in the likedPosts array
-          if (this.likedPosts.some(likedPost => likedPost.postId === post.postId)) {
-            // Set the `liked` flag to `true`
-            post.likedByUser = true;
-          } else {
-            post.likedByUser = false;
-          }
-        });
       },
       (error) => {
         console.log(error);
@@ -95,6 +86,26 @@ export class ForumComponent {
     );
   }
 
+  /**
+   * Flag if post is liked or not.
+   */
+  mapPosts(){
+    this.posts.forEach(post => {
+      // Check if the post is in the likedPosts array
+      if (this.likedPosts.some(likedPost => likedPost.postId === post.postId)) {
+        // Set the `liked` flag to `true`
+        post.likedByUser = true;
+      } else {
+        post.likedByUser = false;
+      }
+    });
+  }
+
+  /**
+   * Check if post is liked. 
+   * @param post 
+   * @returns 
+   */
   isPostLiked(post: Post): boolean {
     return this.likedPosts.some(likedPost => likedPost.postId === post.postId);
   }

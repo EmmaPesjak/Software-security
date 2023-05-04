@@ -165,6 +165,7 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds) {
       } else {
         // Success
         // If the user has disliked the post earlier, make sure to delete it from that table.
+        // #TODO FIND ANOTHER WAY SO AN ERROR IS NOT SENT????
         const deleteQuery = 
         'DELETE FROM dislike WHERE user = ? AND post = ?';
         const stmtDelete = db.prepare(deleteQuery);
@@ -305,7 +306,9 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds) {
   });
 
 
-
+  /**
+   * Get the liked posts for the user.
+   */
   app.get('/api/posts/liked/:userId', (req, res) => {
     const userId = req.params.userId;
     const sql = 'SELECT post FROM like WHERE user = ?';
@@ -316,8 +319,7 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds) {
         console.error(err.message);
         res.status(500).json({"error": "Internal Server Error."});
       } else {
-        const postIds = rows.map(row => row.post);
-        res.status(200).json(postIds);
+        res.status(200).send(rows);
       }
     });
   
@@ -336,7 +338,7 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds) {
         res.status(500).json({"error": "Internal Server Error."});
       } else {
         const postIds = rows.map(row => row.post);
-        res.status(200).json(postIds);
+        res.status(200).send(postIds);
       }
     });
   

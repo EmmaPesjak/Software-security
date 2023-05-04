@@ -169,46 +169,44 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds) {
     stmtInsert.finalize();
   });
 
-    // Make sure that post and user exists.
-    /*const sql = `
-    INSERT INTO like(post, user)
-    SELECT ?, ?
-    WHERE EXISTS(SELECT postId FROM post WHERE postId = ?) AND EXISTS(SELECT userId FROM user WHERE userId = ?)
-    `;*/
-
-    // Insert to table, but, if there's already a record of the combination, delete.
-    /*const sql = `
-    INSERT INTO like(post, user)
-    VALUES (?, ?)
-    ON CONFLICT(post, user) DO DELETE FROM like WHERE post = ? AND user = ?;
-    `;
-
-    const stmt = db.prepare(sql);
-    stmt.bind(postId, user, postId, user);
-
-    // Executes the prepared statement and returns the result.
-    stmt.run(function(err) {
-      if (err) {
-        console.error(err.message);
-        res.status(500).json({"error": "Internal Server Error."});
-      } else if (this.changes === 0) {
-        res.status(400).send('User or post with specified ID does not exist');
-      } else {
-        res.status(201).send();
-      }
-    });
-
-    // Finalizes the prepared statement to release its resources.
-    stmt.finalize();
-  });*/
-
-
+    
   //* POST
   /**
    * Dislikes the specified post.
    */
   app.post('/api/posts/dislike/:postId', (req, res) => {
+
     const postId = req.params.postId,
+    user = req.body.user;
+
+    const insertLikedQuery = 'INSERT INTO dislike (post, user) VALUES (?, ?)';
+
+    const stmtInsert = db.prepare(insertLikedQuery);
+    stmtInsert.bind(postId, user);
+
+    stmtInsert.run(function(err) {
+      if (err) {
+        const deleteQuery = 
+        'DELETE FROM dislike WHERE user = ? AND post = ?';
+        const stmtDelete = db.prepare(deleteQuery);
+        stmtDelete.bind(user, postId);
+        stmtDelete.run(function(err){
+          if (err) {
+            console.error(err.message);
+            res.status(500).json({"error": "Internal Server Error."});
+          } else {
+            res.status(201).send();
+          }
+        });
+        stmtDelete.finalize();
+      } else {
+        res.sendStatus(200);
+      }
+    })
+
+    stmtInsert.finalize();
+
+    /*const postId = req.params.postId,
     user = req.body.user;
 
     // Make sure that post and user exists.
@@ -219,7 +217,7 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds) {
     `;*/
 
     // Insert to table, but, if there's already a record of the combination, delete.
-    const sql = `
+    /*const sql = `
     INSERT INTO dislike(post, user)
     VALUES (?, ?)
     ON CONFLICT(post, user) DELETE FROM dislike WHERE post = ? AND user = ?;
@@ -242,7 +240,7 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds) {
     });
 
     // Finalizes the prepared statement to release its resources.
-    stmt.finalize();
+    stmt.finalize();*/
   });
 
   //* PATCH
@@ -310,6 +308,22 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds) {
     // Finalizes the prepared statement to release its resources.
     stmt.finalize();
   });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   /**
    * Deletes the specified like.

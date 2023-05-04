@@ -46,9 +46,9 @@ module.exports = function(db, app, crypto, createToken, verifyToken, sessionIds)
     stmt.get((err, row) => {
       if (err) {
         console.error(err.message);
-        res.status(500).json({"error": "Internal Server Error."});
+        res.status(500).json('Internal Server Error.');
       } else if (!row) {
-        res.status(404).json({"error": "The username or password is wrong."});
+        res.status(404).json('The username or password is incorrect.');
       } else {
         // Assigns the user a session ID.
         sessionIds.set(userName, sha256(userName));

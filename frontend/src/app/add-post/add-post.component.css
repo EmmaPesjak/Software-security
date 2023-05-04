@@ -2,3 +2,7 @@ h3 {
     margin-top: .2em;
     margin-bottom: .2em;
 }
+
+textarea {
+    font-family: 'Montserrat', sans-serif;
+}

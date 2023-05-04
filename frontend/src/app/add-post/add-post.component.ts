@@ -47,9 +47,6 @@ export class AddPostComponent {
    * @param post is the post that has been added.
    */
   handleAddedPost(post: Post) {
-
-    console.log(post);
-
     // Clear user input.
     this.content = "";
 

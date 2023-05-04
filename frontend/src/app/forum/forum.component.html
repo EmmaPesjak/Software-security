@@ -1,8 +1,8 @@
 <main>
+    <div>@{{loggedinUser}}</div>
     <div class="top_container">
         <app-search (searchTextChanged)="onSearchTextChanged($event)"></app-search>
 
-        <!-- Just nu länkar denna bara tillbaka till index page!!! -->
         <button (click)="logout()" id="logout" type="button">Log out</button>
 
         <button type="button" (click)="showAdd()">Add post</button>
@@ -19,19 +19,15 @@
             <div class="post_name"><b>{{ post.name }}</b></div>
             <div class="post_username">@{{ post.username }}</div>
             <div class="post_content">{{ post.content }}</div>
-            
-            <!-- Satte det till currentPost istället för post === postID, för att kolla läget så att det är en
-            post som ska editas. Före: *ngIf="showEditBox && currentPost" -->
 
-            <div class="edit_box" *ngIf="showEditBox && post.postId === currentPostId" > <!-- Göra detta till en child? -->
+            <div class="edit_box" *ngIf="post.postId === currentPostId">
                 <label>Edit content:<br>
-                    <!--<textarea rows="5" cols="76" [(ngModel)]="post.content" name="content"></textarea>--> <!-- Lyckas inte lägga till default text(gamla content) här?-->
-                    <input class="form-field" [(ngModel)]="content" name="content" required/>
+                    <textarea rows="4" cols="79" maxlength="300" [(ngModel)]="content" name="content" required></textarea>
                   </label>&nbsp;<br>
                 <button type="button" (click)="submitEdit()">submit</button>
             </div> 
 
-            <div class="post_btns" *ngIf="!showEditBox">
+            <div class="post_btns" *ngIf="post.postId != currentPostId">
                 <button type="button" (click)="like(post)" class="like"><img id="thumb_up" src="assets/img/thumb_up.png" alt="thumbs up button"></button>
                 <p>{{ post.likes }}</p>
                 <button type="button" (click)="dislike(post)" class="dislike"><img id="thumb_down" src="assets/img/thumb_down.png" alt="thumbs down button"></button>

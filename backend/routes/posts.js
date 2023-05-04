@@ -142,12 +142,13 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds) {
     user = req.body.user;
 
     const insertLikedQuery = 'INSERT INTO like (post, user) VALUES (?, ?)';
-
     const stmtInsert = db.prepare(insertLikedQuery);
+
     stmtInsert.bind(postId, user);
 
     stmtInsert.run(function(err) {
       if (err) {
+        // If there was an error (unique constraint, it is already in the db), unlike the post.
         const deleteQuery = 
         'DELETE FROM like WHERE user = ? AND post = ?';
         const stmtDelete = db.prepare(deleteQuery);
@@ -162,6 +163,21 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds) {
         });
         stmtDelete.finalize();
       } else {
+        // Success
+        // If the user has disliked the post earlier, make sure to delete it from that table.
+        const deleteQuery = 
+        'DELETE FROM dislike WHERE user = ? AND post = ?';
+        const stmtDelete = db.prepare(deleteQuery);
+        stmtDelete.bind(user, postId);
+        stmtDelete.run(function(err){
+          if (err) {
+            console.error(err.message);
+            //res.status(500).json({"error": "User had not disliked the post."});
+          } else {
+            res.status(201).send();
+          }
+        });
+        stmtDelete.finalize();
         res.sendStatus(200);
       }
     })
@@ -200,47 +216,26 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds) {
         });
         stmtDelete.finalize();
       } else {
+        // Success
+        // If the user has liked the post earlier, make sure to delete it from that table.
+        const deleteQuery = 
+        'DELETE FROM like WHERE user = ? AND post = ?';
+        const stmtDelete = db.prepare(deleteQuery);
+        stmtDelete.bind(user, postId);
+        stmtDelete.run(function(err){
+          if (err) {
+            console.error(err.message);
+            //res.status(500).json({"error": "User had not liked the post."});
+          } else {
+            res.status(201).send();
+          }
+        });
+        stmtDelete.finalize();
         res.sendStatus(200);
       }
     })
 
     stmtInsert.finalize();
-
-    /*const postId = req.params.postId,
-    user = req.body.user;
-
-    // Make sure that post and user exists.
-    /*const sql = `
-    INSERT INTO dislike(post, user)
-    SELECT ?, ?
-    WHERE EXISTS(SELECT postId FROM post WHERE postId = ?) AND EXISTS(SELECT userId FROM user WHERE userId = ?)
-    `;*/
-
-    // Insert to table, but, if there's already a record of the combination, delete.
-    /*const sql = `
-    INSERT INTO dislike(post, user)
-    VALUES (?, ?)
-    ON CONFLICT(post, user) DELETE FROM dislike WHERE post = ? AND user = ?;
-    `;
-
-    const stmt = db.prepare(sql);
-    //stmt.bind(postId, user, postId, user);
-    stmt.bind(postId, user, postId, user);
-
-    // Executes the prepared statement and returns the result.
-    stmt.run(function(err) {
-      if (err) {
-        console.error(err.message);
-        res.status(500).json({"error": "Internal Server Error."});
-      } else if (this.changes === 0) {
-        res.status(400).send('User or post with specified ID does not exist');
-      } else {
-        res.status(201).send();
-      }
-    });
-
-    // Finalizes the prepared statement to release its resources.
-    stmt.finalize();*/
   });
 
   //* PATCH
@@ -311,18 +306,48 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds) {
 
 
 
+  app.get('/api/posts/liked/:userId', (req, res) => {
+    const userId = req.params.userId;
+    const sql = 'SELECT post FROM like WHERE user = ?';
+    const stmt = db.prepare(sql);
+    
+    stmt.all(userId, function(err, rows) {
+      if (err) {
+        console.error(err.message);
+        res.status(500).json({"error": "Internal Server Error."});
+      } else {
+        const postIds = rows.map(row => row.post);
+        res.status(200).json(postIds);
+      }
+    });
+  
+    stmt.finalize();
+  });
+
+  
+  app.get('/api/posts/disliked/:userId', (req, res) => {
+    const userId = req.params.userId;
+    const sql = 'SELECT post FROM dislike WHERE user = ?';
+    const stmt = db.prepare(sql);
+    
+    stmt.all(userId, function(err, rows) {
+      if (err) {
+        console.error(err.message);
+        res.status(500).json({"error": "Internal Server Error."});
+      } else {
+        const postIds = rows.map(row => row.post);
+        res.status(200).json(postIds);
+      }
+    });
+  
+    stmt.finalize();
+  });
+  
 
 
 
 
-
-
-
-
-
-
-
-
+  // REMOVE ???????
 
 
   /**

@@ -13,6 +13,7 @@ export class ForumComponent {
 
   // Create list of all posts.
   posts: Post[];
+  likedPosts: Post[];
 
   showAddBox = false;
 
@@ -22,9 +23,6 @@ export class ForumComponent {
 
   content: string;
 
-  isLiked = false;
-  isDisLiked = false;
-
   // Current post for editing.
   //currentPost : Post |undefined;
   currentPostId = -1;
@@ -32,6 +30,7 @@ export class ForumComponent {
   constructor(private backend: BackendService, private cookieService: CookieService, private router: Router) {
     this.content = "";
     this.posts = [];
+    this.likedPosts = [];
   }
 
   /**
@@ -40,6 +39,7 @@ export class ForumComponent {
   ngOnInit(): void {
     this.loggedinUser = this.cookieService.get('username');
     this.getPosts();
+    //this.getLikedPosts();  // #TODO KIRRA FORFEN
   }
 
   /**
@@ -68,6 +68,35 @@ export class ForumComponent {
     //   // this.posts = posts;
     // })
     // .catch((error) => console.error(`An error occurred getting all posts: ${error}`));
+  }
+
+  /**
+   * Get the users liked post. 
+   */
+  getLikedPosts(){
+    // Get liked posts.
+    this.backend.getLikedPosts().subscribe(
+      (response) => {
+        this.likedPosts = response.body;
+
+        this.posts.forEach(post => {
+          // Check if the post is in the likedPosts array
+          if (this.likedPosts.some(likedPost => likedPost.postId === post.postId)) {
+            // Set the `liked` flag to `true`
+            post.likedByUser = true;
+          } else {
+            post.likedByUser = false;
+          }
+        });
+      },
+      (error) => {
+        console.log(error);
+      }
+    );
+  }
+
+  isPostLiked(post: Post): boolean {
+    return this.likedPosts.some(likedPost => likedPost.postId === post.postId);
   }
 
   /**
@@ -163,10 +192,9 @@ export class ForumComponent {
   like(post: Post) {
     this.backend.likePost(post)
     .then(() => {
-      this.isLiked = true;   //#TODO If the current user has liked it, make it blue.
       this.getPosts();
-    })
-    .catch(error => console.error(`An error occurred when liking the post: ${error}`));
+    })   // #TODO don't catch error??? the error is most likely that the user hasnt disliked before (see backend code)
+    .catch(error => console.error(`An error occurred when liking the post: ${error.message}`));
   }
 
   /**
@@ -176,13 +204,10 @@ export class ForumComponent {
   dislike(post: Post) {
     this.backend.dislikePost(post)
     .then(() => {
-      this.isDisLiked = true;   //#TODO If the current user has disliked it, make it blue.
       this.getPosts();
-    })
+    }) // #TODO don't catch error??? the error is most likely that the user hasnt liked before (see backend code)
     .catch(error => console.error(`An error occurred when disliking the post: ${error}`));
   }
-
-  //TODO: obs! just nu kan man likea/dislikea hur som helst!
 
   logout(): void {
     this.cookieService.delete('numberOfLoginAttemps');

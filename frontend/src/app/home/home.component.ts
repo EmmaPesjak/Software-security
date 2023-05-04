@@ -35,6 +35,7 @@ export class HomeComponent {
       this.message = 'Number of login attempts: ' + parseInt(this.cookieService.get('numberOfLoginAttemps')) + '/5.';*/
       this.backend.login(this.username, this.password).subscribe((data) => {
         this.cookieService.set('username', data.body.username); // TODO Extract the user from `response`, not just the username.
+        this.cookieService.set('userid', data.body.userId);  // WHY IS IT NOT GETTING THE USERID?
         this.router.navigate(['/forum']);
       }, (exception) => {
         this.message = exception.error;

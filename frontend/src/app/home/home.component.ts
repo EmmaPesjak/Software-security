@@ -23,7 +23,7 @@ export class HomeComponent {
 
   login(): void {
     if (this.username.length > 0 && this.password.length > 0) {
-      if (this.cookieService.check('numberOfLoginAttemps')) {
+      /*if (this.cookieService.check('numberOfLoginAttemps')) {
         if (parseInt(this.cookieService.get('numberOfLoginAttemps')) >= 5) {
           this.message = 'You\'ve exceeded the maximum number of login attempts.';
           return;
@@ -32,7 +32,7 @@ export class HomeComponent {
       } else {
         this.cookieService.set('numberOfLoginAttemps', '1');
       }
-      this.message = 'Number of login attempts: ' + parseInt(this.cookieService.get('numberOfLoginAttemps')) + '/5.';
+      this.message = 'Number of login attempts: ' + parseInt(this.cookieService.get('numberOfLoginAttemps')) + '/5.';*/
       this.backend.login(this.username, this.password).subscribe((data) => {
         this.cookieService.set('username', data.body.username); // TODO Extract the user from `response`, not just the username.
         this.router.navigate(['/forum']);

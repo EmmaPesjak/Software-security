@@ -22,6 +22,9 @@ export class ForumComponent {
 
   content: string;
 
+  isLiked = false;
+  isDisLiked = false;
+
   // Current post for editing.
   //currentPost : Post |undefined;
   currentPostId = -1;
@@ -160,6 +163,7 @@ export class ForumComponent {
   like(post: Post) {
     this.backend.likePost(post)
     .then(() => {
+      this.isLiked = true;   //#TODO If the current user has liked it, make it blue.
       this.getPosts();
     })
     .catch(error => console.error(`An error occurred when liking the post: ${error}`));
@@ -172,6 +176,7 @@ export class ForumComponent {
   dislike(post: Post) {
     this.backend.dislikePost(post)
     .then(() => {
+      this.isDisLiked = true;   //#TODO If the current user has disliked it, make it blue.
       this.getPosts();
     })
     .catch(error => console.error(`An error occurred when disliking the post: ${error}`));

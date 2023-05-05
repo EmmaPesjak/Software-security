@@ -13,6 +13,7 @@ export class ForumComponent {
 
   // Create list of all posts.
   posts: Post[];
+  likedPosts: Post[];
 
   showAddBox = false;
 
@@ -29,6 +30,7 @@ export class ForumComponent {
   constructor(private backend: BackendService, private cookieService: CookieService, private router: Router) {
     this.content = "";
     this.posts = [];
+    this.likedPosts = [];
   }
 
   /**
@@ -37,6 +39,8 @@ export class ForumComponent {
   ngOnInit(): void {
     this.loggedinUser = this.cookieService.get('username');
     this.getPosts();
+    this.getLikedPosts();  // #TODO KIRRA FORFEN
+    this.mapPosts();
   }
 
   /**
@@ -65,6 +69,45 @@ export class ForumComponent {
     //   // this.posts = posts;
     // })
     // .catch((error) => console.error(`An error occurred getting all posts: ${error}`));
+  }
+
+  /**
+   * Get the users liked post. 
+   */
+  getLikedPosts(){
+    // Get liked posts.
+    this.backend.getLikedPosts().subscribe(
+      (response) => {
+        this.likedPosts = response.body;
+      },
+      (error) => {
+        console.log(error);
+      }
+    );
+  }
+
+  /**
+   * Flag if post is liked or not.
+   */
+  mapPosts(){
+    this.posts.forEach(post => {
+      // Check if the post is in the likedPosts array
+      if (this.likedPosts.some(likedPost => likedPost.postId === post.postId)) {
+        // Set the `liked` flag to `true`
+        post.likedByUser = true;
+      } else {
+        post.likedByUser = false;
+      }
+    });
+  }
+
+  /**
+   * Check if post is liked. 
+   * @param post 
+   * @returns 
+   */
+  isPostLiked(post: Post): boolean {
+    return this.likedPosts.some(likedPost => likedPost.postId === post.postId);
   }
 
   /**
@@ -161,8 +204,8 @@ export class ForumComponent {
     this.backend.likePost(post)
     .then(() => {
       this.getPosts();
-    })
-    .catch(error => console.error(`An error occurred when liking the post: ${error}`));
+    })   // #TODO don't catch error??? the error is most likely that the user hasnt disliked before (see backend code)
+    .catch(error => console.error(`An error occurred when liking the post: ${error.message}`));
   }
 
   /**
@@ -173,11 +216,9 @@ export class ForumComponent {
     this.backend.dislikePost(post)
     .then(() => {
       this.getPosts();
-    })
+    }) // #TODO don't catch error??? the error is most likely that the user hasnt liked before (see backend code)
     .catch(error => console.error(`An error occurred when disliking the post: ${error}`));
   }
-
-  //TODO: obs! just nu kan man likea/dislikea hur som helst!
 
   logout(): void {
     this.cookieService.delete('numberOfLoginAttemps');

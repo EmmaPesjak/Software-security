@@ -141,65 +141,102 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds) {
     const postId = req.params.postId,
     user = req.body.user;
 
-    // Make sure that post and user exists.
-    const sql = `
-    INSERT INTO like(post, user)
-    SELECT ?, ?
-    WHERE EXISTS(SELECT postId FROM post WHERE postId = ?) AND EXISTS(SELECT userId FROM user WHERE userId = ?)
-    `;
+    const insertLikedQuery = 'INSERT INTO like (post, user) VALUES (?, ?)';
+    const stmtInsert = db.prepare(insertLikedQuery);
 
-    const stmt = db.prepare(sql);
+    stmtInsert.bind(postId, user);
 
-    stmt.bind(postId, user, postId, user);
-
-    // Executes the prepared statement and returns the result.
-    stmt.run(function(err) {
+    stmtInsert.run(function(err) {
       if (err) {
-        console.error(err.message);
-        res.status(500).json({"error": "Internal Server Error."});
-      } else if (this.changes === 0) {
-        res.status(400).send('User or post with specified ID does not exist');
+        // If there was an error (unique constraint, it is already in the db), unlike the post.
+        const deleteQuery = 
+        'DELETE FROM like WHERE user = ? AND post = ?';
+        const stmtDelete = db.prepare(deleteQuery);
+        stmtDelete.bind(user, postId);
+        stmtDelete.run(function(err){
+          if (err) {
+            console.error(err.message);
+            res.status(500).json({"error": "Internal Server Error."});
+          } else {
+            res.status(201).send();
+          }
+        });
+        stmtDelete.finalize();
       } else {
-        res.status(201).send();
+        // Success
+        // If the user has disliked the post earlier, make sure to delete it from that table.
+        // #TODO FIND ANOTHER WAY SO AN ERROR IS NOT SENT????
+        const deleteQuery = 
+        'DELETE FROM dislike WHERE user = ? AND post = ?';
+        const stmtDelete = db.prepare(deleteQuery);
+        stmtDelete.bind(user, postId);
+        stmtDelete.run(function(err){
+          if (err) {
+            console.error(err.message);
+            //res.status(500).json({"error": "User had not disliked the post."});
+          } else {
+            res.status(201).send();
+          }
+        });
+        stmtDelete.finalize();
+        res.sendStatus(200);
       }
-    });
+    })
 
-    // Finalizes the prepared statement to release its resources.
-    stmt.finalize();
+    stmtInsert.finalize();
   });
 
+    
   //* POST
   /**
    * Dislikes the specified post.
    */
   app.post('/api/posts/dislike/:postId', (req, res) => {
+
     const postId = req.params.postId,
     user = req.body.user;
 
-    // Make sure that post and user exists.
-    const sql = `
-    INSERT INTO dislike(post, user)
-    SELECT ?, ?
-    WHERE EXISTS(SELECT postId FROM post WHERE postId = ?) AND EXISTS(SELECT userId FROM user WHERE userId = ?)
-    `;
+    const insertLikedQuery = 'INSERT INTO dislike (post, user) VALUES (?, ?)';
 
-    const stmt = db.prepare(sql);
-    stmt.bind(postId, user, postId, user);
+    const stmtInsert = db.prepare(insertLikedQuery);
+    stmtInsert.bind(postId, user);
 
-    // Executes the prepared statement and returns the result.
-    stmt.run(function(err) {
+    stmtInsert.run(function(err) {
       if (err) {
-        console.error(err.message);
-        res.status(500).json({"error": "Internal Server Error."});
-      } else if (this.changes === 0) {
-        res.status(400).send('User or post with specified ID does not exist');
+        const deleteQuery = 
+        'DELETE FROM dislike WHERE user = ? AND post = ?';
+        const stmtDelete = db.prepare(deleteQuery);
+        stmtDelete.bind(user, postId);
+        stmtDelete.run(function(err){
+          if (err) {
+            console.error(err.message);
+            res.status(500).json({"error": "Internal Server Error."});
+          } else {
+            res.status(201).send();
+          }
+        });
+        stmtDelete.finalize();
       } else {
-        res.status(201).send();
+        // Success
+        // If the user has liked the post earlier, make sure to delete it from that table.
+        const deleteQuery = 
+        'DELETE FROM like WHERE user = ? AND post = ?';
+        const stmtDelete = db.prepare(deleteQuery);
+        stmtDelete.bind(user, postId);
+        stmtDelete.run(function(err){
+          if (err) {
+            console.error(err.message);
+            //res.status(500).json({"error": "User had not liked the post."});
+          } else {
+            res.status(201).send();
+          }
+        });
+        stmtDelete.finalize();
+        res.sendStatus(200);
       }
-    });
+    })
 
-    // Finalizes the prepared statement to release its resources.
-    stmt.finalize();
+    stmtInsert.finalize();
   });
 
   //* PATCH
@@ -267,6 +304,53 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds) {
     // Finalizes the prepared statement to release its resources.
     stmt.finalize();
   });
+
+
+  /**
+   * Get the liked posts for the user.
+   */
+  app.get('/api/posts/liked/:userId', (req, res) => {
+    const userId = req.params.userId;
+    const sql = 'SELECT post FROM like WHERE user = ?';
+    const stmt = db.prepare(sql);
+    
+    stmt.all(userId, function(err, rows) {
+      if (err) {
+        console.error(err.message);
+        res.status(500).json({"error": "Internal Server Error."});
+      } else {
+        res.status(200).send(rows);
+      }
+    });
+  
+    stmt.finalize();
+  });
+
+  
+  app.get('/api/posts/disliked/:userId', (req, res) => {
+    const userId = req.params.userId;
+    const sql = 'SELECT post FROM dislike WHERE user = ?';
+    const stmt = db.prepare(sql);
+    
+    stmt.all(userId, function(err, rows) {
+      if (err) {
+        console.error(err.message);
+        res.status(500).json({"error": "Internal Server Error."});
+      } else {
+        const postIds = rows.map(row => row.post);
+        res.status(200).send(postIds);
+      }
+    });
+  
+    stmt.finalize();
+  });
+  
+
+
+
+
+  // REMOVE ???????
+
 
   /**
    * Deletes the specified like.

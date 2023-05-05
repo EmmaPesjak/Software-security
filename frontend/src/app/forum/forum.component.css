@@ -29,6 +29,10 @@
     border: none;
 }
 
+.blue {
+    background-color: blue;
+}
+
 .delete, .edit {
     margin-top: .8em;
     margin-bottom: .8em;

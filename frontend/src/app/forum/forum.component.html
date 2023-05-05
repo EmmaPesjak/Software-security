@@ -28,7 +28,7 @@
             </div> 
 
             <div class="post_btns" *ngIf="post.postId != currentPostId">
-                <button type="button" (click)="like(post)" class="like"><img id="thumb_up" src="assets/img/thumb_up.png" alt="thumbs up button"></button>
+                <button type="button" (click)="like(post)" class="like" [ngClass]="{ 'blue': isPostLiked(post) }"><img id="thumb_up" src="assets/img/thumb_up.png" alt="thumbs up button"></button>
                 <p>{{ post.likes }}</p>
                 <button type="button" (click)="dislike(post)" class="dislike"><img id="thumb_down" src="assets/img/thumb_down.png" alt="thumbs down button"></button>
                 <p>{{ post.dislikes }}</p>

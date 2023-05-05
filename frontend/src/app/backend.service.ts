@@ -55,6 +55,22 @@ export class BackendService {
   }
 
   /**
+   * Get all liked posts.
+   * @returns 
+   */
+  getLikedPosts(): Observable<any> {
+    const endpoint = this.API_URL + "/api/posts/liked/" + this.cookieService.get('userid'),
+    options: {headers: any; observe: any; withCredentials: any} = {
+      headers: new HttpHeaders({
+        "Content-Type": "application/json",
+      }),
+      observe: "response",
+      withCredentials: true,
+    };
+    return this.http.get(endpoint, options);
+  }
+
+  /**
    * Add (POST) a post.
    * @param post is the post with all its attributes to add.
    * @returns a Promise that resolves to an added post.

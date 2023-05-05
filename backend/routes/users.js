@@ -1,8 +1,5 @@
 module.exports = function(db, app, crypto, createToken, verifyToken, sessionIds, csrfTokens) {
-
-  //TODO verify CSRF in all (or atleast POST etc) endpoints
-
-  
+ 
   //* GET
   /**
    * Retrieves all users.

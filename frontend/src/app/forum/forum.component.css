@@ -52,3 +52,7 @@
 textarea {
     font-family: 'Montserrat', sans-serif;
 }
+
+.post_content { 
+    word-break: break-all; 
+}

@@ -14,8 +14,8 @@ export class HomeComponent {
   message: string;
 
   constructor(private backend: BackendService, private cookieService: CookieService, private router: Router) {
-    if (this.cookieService.check('numberOfLoginAttemps')) {
-      this.message = 'Number of login attempts: ' + parseInt(this.cookieService.get('numberOfLoginAttemps')) + '/5.';
+    if (this.cookieService.check('numberOfLoginAttempts')) {
+      this.message = 'Number of login attempts: ' + parseInt(this.cookieService.get('numberOfLoginAttempts')) + '/5.';
     } else {
       this.message = 'Number of login attempts: ' + 0 + '/5.';
     }
@@ -23,16 +23,24 @@ export class HomeComponent {
 
   login(): void {
     if (this.username.length > 0 && this.password.length > 0) {
-      /*if (this.cookieService.check('numberOfLoginAttemps')) {
-        if (parseInt(this.cookieService.get('numberOfLoginAttemps')) >= 5) {
+      if (this.cookieService.check('numberOfLoginAttempts')) {
+        if (this.cookieService.check('timer') && Date.now() > Date.parse(this.cookieService.get('timer'))) {
+          this.cookieService.set('numberOfLoginAttempts', '0');
+          this.cookieService.delete('timer');
+        } else if (parseInt(this.cookieService.get('numberOfLoginAttempts')) >= 5) {
           this.message = 'You\'ve exceeded the maximum number of login attempts.';
+          if (!this.cookieService.check('timer')) {
+            const date: Date = new Date();
+            date.setMinutes(date.getMinutes() + 5);
+            this.cookieService.set('timer', date.toISOString());
+          }
           return;
         }
-        this.cookieService.set('numberOfLoginAttemps', (parseInt(this.cookieService.get('numberOfLoginAttemps')) + 1).toString());
+        this.cookieService.set('numberOfLoginAttempts', (parseInt(this.cookieService.get('numberOfLoginAttempts')) + 1).toString());
       } else {
-        this.cookieService.set('numberOfLoginAttemps', '1');
+        this.cookieService.set('numberOfLoginAttempts', '1');
       }
-      this.message = 'Number of login attempts: ' + parseInt(this.cookieService.get('numberOfLoginAttemps')) + '/5.';*/
+      this.message = 'Number of login attempts: ' + parseInt(this.cookieService.get('numberOfLoginAttempts')) + '/5.';
       this.backend.login(this.username, this.password).subscribe((data) => {
         this.cookieService.set('username', data.body.username); // TODO Extract the user from `response`, not just the username.
         this.cookieService.set('userid', data.body.userId);

@@ -96,7 +96,10 @@ export class BackendService {
    */
   deletePost(post: Post) {
     const endpoint = this.API_URL + '/api/posts/' + post.postId;
-    const responseObservable = this.http.delete<Post>(endpoint);
+    const options = {
+      withCredentials: true
+    };
+    const responseObservable = this.http.delete<Post>(endpoint, options);
     const responsePromise = firstValueFrom(responseObservable);
     return responsePromise;
   }

@@ -93,26 +93,20 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTok
    * Creates a post.
    */
   app.post('/api/posts', (req, res) => {
-    const {content, username} = req.body;
+    const {content} = req.body;
 
-    const token = req.cookies.jwtToken;
-    console.log("this is token in create posts hej: " + token);
+    // If the jwtToken in the cookies is the same as the generated one, the user is authorized. 
+    const jwtToken = req.cookies.jwtToken;
+    const decoded = verifyToken(jwtToken);
+    if (!decoded){
+      return res.status(401).send({ error: 'Unauthorized' });
+    }
 
-    console.log("this is csrftoken in create posts hej: " + req.cookies.csrfToken);
+    const username = decoded.username;
 
-    if (!verifyToken(token)){
-      res.status(401).send({ error: 'Unauthorized' });
-    } 
-
-    // #TODO verify token  
-    //const {content, token} = req.body;
-    //const decodedToken = verifyToken(token);
-    //if (!decodedToken) {
-    //  return res.status(401).json({ error: 'Invalid token' });
-    //}
-    // If the user is authenticated, assign the token's userId to user.
-    //const user = decodedToken.userId;
-
+    //if (!verifyToken(token)){
+    //  res.status(401).send({ error: 'Unauthorized' });
+    //} 
 
     console.log(req.get("Authorization"));
     console.log(req.cookies.csrfToken);

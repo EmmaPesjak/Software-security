@@ -21,10 +21,6 @@ export class AuthInterceptor implements HttpInterceptor {
     const csrfToken = this.cookieService.get("csrfToken");
     const jwtToken = this.cookieService.get("jwtToken");
     
-    console.log("this is in auth jwt: " +jwtToken);
-    console.log("this is in auth csrf: " +csrfToken);
-    
-
     if (csrfToken && jwtToken) {
 
       const headers = request.headers

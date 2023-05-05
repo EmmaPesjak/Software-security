@@ -112,7 +112,11 @@ export class BackendService {
       postId: post.postId,
       user: post.user
     };
-    const responseObservable = this.http.post<Post>(endpoint, body);
+
+    const options = {
+      withCredentials: true
+    };
+    const responseObservable = this.http.post<Post>(endpoint, body, options);
     const responsePromise = firstValueFrom(responseObservable);
     return responsePromise;
   }
@@ -128,7 +132,10 @@ export class BackendService {
       postId: post.postId,
       user: post.user
     };
-    const responseObservable = this.http.post<Post>(endpoint, body);
+    const options = {
+      withCredentials: true
+    };
+    const responseObservable = this.http.post<Post>(endpoint, body, options);
     const responsePromise = firstValueFrom(responseObservable);
     return responsePromise;
   }
@@ -162,8 +169,11 @@ export class BackendService {
       content: post.content,
       user: post.user  
     }
+    const options = {
+      withCredentials: true
+    };
     
-    const responseObservable = this.http.patch<Post>(endpoint, body);
+    const responseObservable = this.http.patch<Post>(endpoint, body, options);
     const responsePromise = firstValueFrom(responseObservable);
     return responsePromise;
   }

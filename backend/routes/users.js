@@ -71,7 +71,6 @@ module.exports = function(db, app, crypto, createToken, verifyToken, sessionIds,
 
         // Create a JWT token and send in a cookie.
         const jwtBearerToken = createToken(userName);
-        console.log("token haj " + jwtBearerToken);
         res.cookie("jwtToken", jwtBearerToken, {secure: true, maxAge: 1000 * 60 * 60});
         
         //res.cookie('token', token, options);

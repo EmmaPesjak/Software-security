@@ -8,7 +8,8 @@ users = require('./routes/users'),
 posts = require('./routes/posts'),
 token = require('./token.js');
 
-
+const Tokens = require('csrf');
+const csrfTokens = new Tokens();
 
 // Opens a connection to the DB.
 // The DB consists of four tables:
@@ -50,8 +51,8 @@ if (db) {
     const sessionIds = new Map();
 
     // Exports `db`, `app`, `crypto`, `createToken`, `verifyToken`, and `sessionIds`.
-    users(db, app, crypto, token.createToken, token.verifyToken, sessionIds);
-    posts(db, app, token.createToken, token.verifyToken, sessionIds);
+    users(db, app, crypto, token.createToken, token.verifyToken, sessionIds, csrfTokens);
+    posts(db, app, token.createToken, token.verifyToken, sessionIds, csrfTokens);
 }
 
 // // Closes the connection to the DB.

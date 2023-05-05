@@ -1,6 +1,8 @@
 // const { verifyToken } = require('../token.js');
 
-module.exports = function(db, app, createToken, verifyToken, sessionIds) {
+module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTokens) {
+
+  //TODO verify CSRF in all (or atleast POST etc) endpoints
 
   //* GET
   /**
@@ -19,6 +21,11 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds) {
     //if (!verifyToken(token)){
     //  return res.status(401).json({"error": "No active session."});
     //}
+
+
+    if (!req.body.debug && (!sessionIds.has(userName) || req.cookies.ID !== sessionIds.get(userName))) {
+      return res.status(401).json({"error":'No active session.'});
+    } 
 
     // The SQL query to retrieve all posts..
     const sql = `

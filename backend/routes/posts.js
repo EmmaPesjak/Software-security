@@ -16,11 +16,6 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTok
     //  console.log("No logged in user");
     //  return;
     //} //return res.redirect('/');//return res.status(401).json({"error": "No active session."});
-    //const token = req.cookies.token;
-
-    //if (!verifyToken(token)){
-    //  return res.status(401).json({"error": "No active session."});
-    //}
 
     if (!req.body.debug && (!sessionIds.has(userName) || req.cookies.ID !== sessionIds.get(userName))) {
       return res.status(401).json({"error":'No active session.'});
@@ -100,6 +95,15 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTok
   app.post('/api/posts', (req, res) => {
     const {content, username} = req.body;
 
+    const token = req.cookies.jwtToken;
+    console.log("this is token in create posts hej: " + token);
+
+    console.log("this is csrftoken in create posts hej: " + req.cookies.csrfToken);
+
+    if (!verifyToken(token)){
+      res.status(401).send({ error: 'Unauthorized' });
+    } 
+
     // #TODO verify token  
     //const {content, token} = req.body;
     //const decodedToken = verifyToken(token);
@@ -113,9 +117,6 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTok
     console.log(req.get("Authorization"));
     console.log(req.cookies.csrfToken);
   
-  
-
-
     // Make sure that user exists and connect the post to the userID.
     const sql = `
     INSERT INTO post(content, user)

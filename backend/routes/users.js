@@ -68,7 +68,11 @@ module.exports = function(db, app, crypto, createToken, verifyToken, sessionIds,
         res.cookie('csrfToken', csrfToken, {secure: true, maxAge: 1000 * 60 * 60});
 
         res.cookie('ID', sessionIds.get(userName), options); // TODO Use `token` instead of `sessionIds.get(userName)`.
-        
+
+        // Create a JWT token and send in a cookie.
+        const jwtBearerToken = createToken(userName);
+        console.log("token haj " + jwtBearerToken);
+        res.cookie("jwtToken", jwtBearerToken, {secure: true, maxAge: 1000 * 60 * 60});
         
         //res.cookie('token', token, options);
         res.status(200).json(row);

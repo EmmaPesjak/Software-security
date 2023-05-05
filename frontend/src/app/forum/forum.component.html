@@ -32,7 +32,7 @@
                 <p>{{ post.likes }}</p>
                 <button type="button" (click)="dislike(post)" class="dislike"><img id="thumb_down" src="assets/img/thumb_down.png" alt="thumbs down button"></button>
                 <p>{{ post.dislikes }}</p>
-                <button type="button" (click)="deletePost(post)" *ngIf="loggedinUser=== post.username" class="delete">Delete</button>
+                <button type="button" (click)="deletePost(post)" *ngIf="loggedinUser=== post.username || loggedinUser === 'admin'" class="delete">Delete</button>
 
                 <!-- Ändrat till showEdit(post) för att sätta current post för editing. -->
                 <button type="button" (click)="showEdit(post)" *ngIf="loggedinUser=== post.username" class="edit">Edit</button>

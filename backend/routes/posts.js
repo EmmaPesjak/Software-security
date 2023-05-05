@@ -324,10 +324,7 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTok
    */
   app.delete('/api/posts/:id', (req, res) => {
     const postId = req.params.id,
-    //userId = req.cookies.userid;
     userId = Number(req.cookies.userid);
-
-    console.log("userid: " + userId);
 
     // Check if csrf-token match.
     const csrfToken = req.cookies.csrfToken;
@@ -352,8 +349,6 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTok
         res.status(500).json({"error": "Internal Server Error."});
       } else {
         const user = row.user;
-        console.log('userId:', typeof userId, userId);
-        console.log('user:', typeof user, user);
         // if the user is not admin, nor the owner of the post, return.
         if (userId !== user && decoded.username !== 'admin'){
           return res.status(401).send({ error: 'Unauthorized' });

@@ -7,7 +7,7 @@ const publicKey = fs.readFileSync('./public.key', 'utf8');
 
 /**
  * Generate a token with the private key and RS256 algorithm.
- * @param {*} username username.
+ * @param {*} username username.  #TODO Make the entire user payload.
  * @returns token.
  */
 function createToken(username){

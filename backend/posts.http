@@ -50,10 +50,11 @@ POST {{url}}/users HTTP/1.1
 content-type: application/json
 
 {
-   "userName": "limalm",
-   "name": "Li Malm",
-   "email": "limalm@gmail.com",
-   "password": "li123"
+   "userName": "admin",
+   "name": "Admin",
+   "email": "admin@gmail.com",
+   "password": "Admin123456*",
+   "isAdmin": true
 }
 
 ###############################################

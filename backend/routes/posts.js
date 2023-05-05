@@ -323,7 +323,11 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTok
    * Deletes the specified post.
    */
   app.delete('/api/posts/:id', (req, res) => {
-    const postId = req.params.id;
+    const postId = req.params.id,
+    //userId = req.cookies.userid;
+    userId = Number(req.cookies.userid);
+
+    console.log("userid: " + userId);
 
     // Check if csrf-token match.
     const csrfToken = req.cookies.csrfToken;
@@ -338,29 +342,47 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTok
       return res.status(401).send({ error: 'Unauthorized' });
     }
 
-    // The SQL query to delete the specified post.
-    const sql = 'DELETE FROM post WHERE postId = ?';
+    const userSql = 'SELECT user FROM post WHERE postId = ?'
+    const userStmt = db.prepare(userSql);
+    userStmt.bind(postId);
 
-    // Prepares the SQL statement.
-    const stmt = db.prepare(sql);
-
-    // Binds the parameters to the prepared statement.
-    stmt.bind(postId);
-
-    // Executes the prepared statement and returns the result.
-    stmt.run(function(err) {
+    userStmt.get((err, row) => {
       if (err) {
         console.error(err.message);
         res.status(500).json({"error": "Internal Server Error."});
-      } else if (this.changes === 0) {
-        res.status(404).send('Post with specified ID not found');
       } else {
-        res.status(204).send({id: this.lastID});
-      }
-    });
+        const user = row.user;
+        console.log('userId:', typeof userId, userId);
+        console.log('user:', typeof user, user);
+        // if the user is not admin, nor the owner of the post, return.
+        if (userId !== user && decoded.username !== 'admin'){
+          return res.status(401).send({ error: 'Unauthorized' });
+        }
 
-    // Finalizes the prepared statement to release its resources.
-    stmt.finalize();
+        // The SQL query to delete the specified post.
+        const sql = 'DELETE FROM post WHERE postId = ?';
+
+        // Prepares the SQL statement.
+        const stmt = db.prepare(sql);
+
+        // Binds the parameters to the prepared statement.
+        stmt.bind(postId);
+
+        // Executes the prepared statement and returns the result.
+        stmt.run(function(err) {
+          if (err) {
+            console.error(err.message);
+            res.status(500).json({"error": "Internal Server Error."});
+          } else {
+            res.status(204).send({id: this.lastID});
+          }
+        });
+
+        // Finalizes the prepared statement to release its resources.
+        stmt.finalize();
+        }
+      })
+    userStmt.finalize();
   });
 
 

@@ -67,16 +67,20 @@ function verifyToken(token) {
 }*/
 
 const jwt = require('jsonwebtoken');
+const fs = require('fs');
+
+const privateKey = fs.readFileSync('./private.key', 'utf8');
+const publicKey = fs.readFileSync('./public.key', 'utf8');
 
 // Create a token
 //const token = jwt.sign({ username: 'john.doe' }, 'secret');
 
 function createToken(username){
-  return jwt.sign({ username: username }, 'secret');
+  return jwt.sign({ username: username }, privateKey, { algorithm: 'RS256'});
 }
 
 function verifyToken(token){
-  return jwt.verify(token, 'secret');
+  return jwt.verify(token, publicKey, { algorithms: ['RS256'] });
 }
 
 // Verify a token

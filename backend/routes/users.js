@@ -1,4 +1,8 @@
-module.exports = function(db, app, crypto, createToken, verifyToken, sessionIds) {
+module.exports = function(db, app, crypto, createToken, verifyToken, sessionIds, csrfTokens) {
+
+  //TODO verify CSRF in all (or atleast POST etc) endpoints
+
+  
   //* GET
   /**
    * Retrieves all users.
@@ -56,12 +60,19 @@ module.exports = function(db, app, crypto, createToken, verifyToken, sessionIds)
         //const token = createToken(userName);
 
         const options = { // TODO Are there more options we should utilize?
-          // httpOnly: true, // Only the server can access the cookie.
+          httpOnly: true, // Only the server can access the cookie.
+          secure: true,
           maxAge: 1000 * 60 * 60, // Expires after 1 hour. // TODO How can expiration be handled? E.g., the frontend sends the user to the login page?
         }
 
-        res.cookie('ID', sessionIds.get(userName), options); // TODO Use `token` instead of `sessionIds.get(userName)`.
+        // Create a CSRF token and send in a cookie.
+        const secret = csrfTokens.secretSync();
+        var csrfToken = csrfTokens.create(secret);
+        res.cookie('csrfToken', csrfToken, {secure: true, maxAge: 1000 * 60 * 60});
 
+        res.cookie('ID', sessionIds.get(userName), options); // TODO Use `token` instead of `sessionIds.get(userName)`.
+        
+        
         //res.cookie('token', token, options);
         res.status(200).json(row);
       }

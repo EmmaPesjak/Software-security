@@ -1,4 +1,4 @@
-import { HttpClientModule } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, HttpClientModule, HttpClientXsrfModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
@@ -11,6 +11,7 @@ import { ForumComponent } from './forum/forum.component';
 import { HomeComponent } from './home/home.component';
 import { RegisterComponent } from './register/register.component';
 import { SearchComponent } from './search/search.component';
+import { AuthInterceptor } from './auth.interceptor';
 
 @NgModule({
   declarations: [
@@ -24,10 +25,20 @@ import { SearchComponent } from './search/search.component';
   imports: [
     BrowserModule,
     HttpClientModule,
+    HttpClientXsrfModule.withOptions({
+      cookieName: 'csrfToken',
+      headerName: 'Authorization',
+    }),
     AppRoutingModule,
     FormsModule
   ],
-  providers: [CookieService],
+  providers: [
+    CookieService, {
+      provide: HTTP_INTERCEPTORS,
+      useClass: AuthInterceptor,
+      multi: true
+    }
+  ],
   bootstrap: [AppComponent]
 })
 

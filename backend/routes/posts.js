@@ -22,7 +22,6 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTok
     //  return res.status(401).json({"error": "No active session."});
     //}
 
-
     if (!req.body.debug && (!sessionIds.has(userName) || req.cookies.ID !== sessionIds.get(userName))) {
       return res.status(401).json({"error":'No active session.'});
     } 
@@ -109,6 +108,12 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTok
     //}
     // If the user is authenticated, assign the token's userId to user.
     //const user = decodedToken.userId;
+
+
+    console.log(req.get("Authorization"));
+    console.log(req.cookies.csrfToken);
+  
+  
 
 
     // Make sure that user exists and connect the post to the userID.

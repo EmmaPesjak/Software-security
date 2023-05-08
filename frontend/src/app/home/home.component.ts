@@ -23,7 +23,7 @@ export class HomeComponent {
 
   login(): void {
     if (this.username.length > 0 && this.password.length > 0) {
-      if (this.cookieService.check('numberOfLoginAttempts')) {
+      /*if (this.cookieService.check('numberOfLoginAttempts')) {
         if (this.cookieService.check('timer') && Date.now() > Date.parse(this.cookieService.get('timer'))) {
           this.cookieService.set('numberOfLoginAttempts', '0');
           this.cookieService.delete('timer');
@@ -40,7 +40,7 @@ export class HomeComponent {
       } else {
         this.cookieService.set('numberOfLoginAttempts', '1');
       }
-      this.message = 'Number of login attempts: ' + parseInt(this.cookieService.get('numberOfLoginAttempts')) + '/5.';
+      this.message = 'Number of login attempts: ' + parseInt(this.cookieService.get('numberOfLoginAttempts')) + '/5.';*/
       this.backend.login(this.username, this.password).subscribe((data) => {
         this.cookieService.set('username', data.body.username); // TODO Extract the user from `response`, not just the username.
         this.cookieService.set('userid', data.body.userId);

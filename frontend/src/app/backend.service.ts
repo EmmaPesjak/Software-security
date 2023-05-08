@@ -81,7 +81,10 @@ export class BackendService {
       content: contenthej,
       username: this.cookieService.get('username'),
     };
-    const responseObservable = this.http.post<Post>(endpoint, body);
+    const options = {
+      withCredentials: true
+    };
+    const responseObservable = this.http.post<Post>(endpoint, body, options);
     const responsePromise = firstValueFrom(responseObservable);
     return responsePromise;
   }
@@ -93,7 +96,10 @@ export class BackendService {
    */
   deletePost(post: Post) {
     const endpoint = this.API_URL + '/api/posts/' + post.postId;
-    const responseObservable = this.http.delete<Post>(endpoint);
+    const options = {
+      withCredentials: true
+    };
+    const responseObservable = this.http.delete<Post>(endpoint, options);
     const responsePromise = firstValueFrom(responseObservable);
     return responsePromise;
   }
@@ -109,7 +115,11 @@ export class BackendService {
       postId: post.postId,
       user: post.user
     };
-    const responseObservable = this.http.post<Post>(endpoint, body);
+
+    const options = {
+      withCredentials: true
+    };
+    const responseObservable = this.http.post<Post>(endpoint, body, options);
     const responsePromise = firstValueFrom(responseObservable);
     return responsePromise;
   }
@@ -125,7 +135,10 @@ export class BackendService {
       postId: post.postId,
       user: post.user
     };
-    const responseObservable = this.http.post<Post>(endpoint, body);
+    const options = {
+      withCredentials: true
+    };
+    const responseObservable = this.http.post<Post>(endpoint, body, options);
     const responsePromise = firstValueFrom(responseObservable);
     return responsePromise;
   }
@@ -159,8 +172,11 @@ export class BackendService {
       content: post.content,
       user: post.user  
     }
+    const options = {
+      withCredentials: true
+    };
     
-    const responseObservable = this.http.patch<Post>(endpoint, body);
+    const responseObservable = this.http.patch<Post>(endpoint, body, options);
     const responsePromise = firstValueFrom(responseObservable);
     return responsePromise;
   }

@@ -16,11 +16,6 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTok
     //  console.log("No logged in user");
     //  return;
     //} //return res.redirect('/');//return res.status(401).json({"error": "No active session."});
-    //const token = req.cookies.token;
-
-    //if (!verifyToken(token)){
-    //  return res.status(401).json({"error": "No active session."});
-    //}
 
     if (!req.body.debug && (!sessionIds.has(userName) || req.cookies.ID !== sessionIds.get(userName))) {
       return res.status(401).json({"error":'No active session.'});
@@ -98,24 +93,23 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTok
    * Creates a post.
    */
   app.post('/api/posts', (req, res) => {
-    const {content, username} = req.body;
+    const {content} = req.body;
 
-    // #TODO verify token  
-    //const {content, token} = req.body;
-    //const decodedToken = verifyToken(token);
-    //if (!decodedToken) {
-    //  return res.status(401).json({ error: 'Invalid token' });
-    //}
-    // If the user is authenticated, assign the token's userId to user.
-    //const user = decodedToken.userId;
+    // Check if csrf-token match.
+    const csrfToken = req.cookies.csrfToken;
+    if (req.headers['x-csrf-token'] !== csrfToken) {
+      return res.status(403).send({ error: 'CSRF token mismatch' });
+    }
 
+    // If the jwtToken in the cookies is the same as the generated one, the user is authorized. 
+    const jwtToken = req.cookies.jwtToken;
+    const decoded = verifyToken(jwtToken);
+    if (!decoded){
+      return res.status(401).send({ error: 'Unauthorized' });
+    }
 
-    console.log(req.get("Authorization"));
-    console.log(req.cookies.csrfToken);
+    const username = decoded.username;
   
-  
-
-
     // Make sure that user exists and connect the post to the userID.
     const sql = `
     INSERT INTO post(content, user)
@@ -152,6 +146,19 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTok
   app.post('/api/posts/like/:postId', (req, res) => {
     const postId = req.params.postId,
     user = req.body.user;
+
+    // Check if csrf-token match.
+    const csrfToken = req.cookies.csrfToken;
+    if (req.headers['x-csrf-token'] !== csrfToken) {
+      return res.status(403).send({ error: 'CSRF token mismatch' });
+    }
+
+    // If the jwtToken in the cookies is the same as the generated one, the user is authorized. 
+    const jwtToken = req.cookies.jwtToken;
+    const decoded = verifyToken(jwtToken);
+    if (!decoded){
+      return res.status(401).send({ error: 'Unauthorized' });
+    }
 
     const insertLikedQuery = 'INSERT INTO like (post, user) VALUES (?, ?)';
     const stmtInsert = db.prepare(insertLikedQuery);
@@ -208,6 +215,19 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTok
     const postId = req.params.postId,
     user = req.body.user;
 
+    // Check if csrf-token match.
+    const csrfToken = req.cookies.csrfToken;
+    if (req.headers['x-csrf-token'] !== csrfToken) {
+      return res.status(403).send({ error: 'CSRF token mismatch' });
+    }
+
+    // If the jwtToken in the cookies is the same as the generated one, the user is authorized. 
+    const jwtToken = req.cookies.jwtToken;
+    const decoded = verifyToken(jwtToken);
+    if (!decoded){
+      return res.status(401).send({ error: 'Unauthorized' });
+    }
+
     const insertLikedQuery = 'INSERT INTO dislike (post, user) VALUES (?, ?)';
 
     const stmtInsert = db.prepare(insertLikedQuery);
@@ -260,6 +280,19 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTok
     const user = req.body.user;  // userID
     const content = req.body.content;
 
+    // Check if csrf-token match.
+    const csrfToken = req.cookies.csrfToken;
+    if (req.headers['x-csrf-token'] !== csrfToken) {
+      return res.status(403).send({ error: 'CSRF token mismatch' });
+    }
+
+    // If the jwtToken in the cookies is the same as the generated one, the user is authorized. 
+    const jwtToken = req.cookies.jwtToken;
+    const decoded = verifyToken(jwtToken);
+    if (!decoded){
+      return res.status(401).send({ error: 'Unauthorized' });
+    }
+
     // The SQL query to update the specified post.
     const sql = 'UPDATE post SET content = ? WHERE postId = ? AND user = ?';
   
@@ -290,31 +323,61 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTok
    * Deletes the specified post.
    */
   app.delete('/api/posts/:id', (req, res) => {
-    const postId = req.params.id;
+    const postId = req.params.id,
+    userId = Number(req.cookies.userid);
 
-    // The SQL query to delete the specified post.
-    const sql = 'DELETE FROM post WHERE postId = ?';
+    // Check if csrf-token match.
+    const csrfToken = req.cookies.csrfToken;
+    if (req.headers['x-csrf-token'] !== csrfToken) {
+      return res.status(403).send({ error: 'CSRF token mismatch' });
+    }
 
-    // Prepares the SQL statement.
-    const stmt = db.prepare(sql);
+    // If the jwtToken in the cookies is the same as the generated one, the user is authorized. 
+    const jwtToken = req.cookies.jwtToken;
+    const decoded = verifyToken(jwtToken);
+    if (!decoded){
+      return res.status(401).send({ error: 'Unauthorized' });
+    }
 
-    // Binds the parameters to the prepared statement.
-    stmt.bind(postId);
+    const userSql = 'SELECT user FROM post WHERE postId = ?'
+    const userStmt = db.prepare(userSql);
+    userStmt.bind(postId);
 
-    // Executes the prepared statement and returns the result.
-    stmt.run(function(err) {
+    userStmt.get((err, row) => {
       if (err) {
         console.error(err.message);
         res.status(500).json({"error": "Internal Server Error."});
-      } else if (this.changes === 0) {
-        res.status(404).send('Post with specified ID not found');
       } else {
-        res.status(204).send({id: this.lastID});
-      }
-    });
+        const user = row.user;
+        // if the user is not admin, nor the owner of the post, return.
+        if (userId !== user && decoded.username !== 'admin'){
+          return res.status(401).send({ error: 'Unauthorized' });
+        }
 
-    // Finalizes the prepared statement to release its resources.
-    stmt.finalize();
+        // The SQL query to delete the specified post.
+        const sql = 'DELETE FROM post WHERE postId = ?';
+
+        // Prepares the SQL statement.
+        const stmt = db.prepare(sql);
+
+        // Binds the parameters to the prepared statement.
+        stmt.bind(postId);
+
+        // Executes the prepared statement and returns the result.
+        stmt.run(function(err) {
+          if (err) {
+            console.error(err.message);
+            res.status(500).json({"error": "Internal Server Error."});
+          } else {
+            res.status(204).send({id: this.lastID});
+          }
+        });
+
+        // Finalizes the prepared statement to release its resources.
+        stmt.finalize();
+        }
+      })
+    userStmt.finalize();
   });
 
 
@@ -371,6 +434,19 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTok
     const postId = req.params.postId,
     user = req.body.user;
 
+    // Check if csrf-token match.
+    const csrfToken = req.cookies.csrfToken;
+    if (req.headers['x-csrf-token'] !== csrfToken) {
+      return res.status(403).send({ error: 'CSRF token mismatch' });
+    }
+
+    // If the jwtToken in the cookies is the same as the generated one, the user is authorized. 
+    const jwtToken = req.cookies.jwtToken;
+    const decoded = verifyToken(jwtToken);
+    if (!decoded){
+      return res.status(401).send({ error: 'Unauthorized' });
+    }
+
     // Make sure that user and post exists.
     const sql = `
     DELETE FROM like
@@ -404,6 +480,19 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTok
   app.delete('/api/posts/dislike/:postId', (req, res) => {
     const postId = req.params.postId,
     user = req.body.user;
+
+    // Check if csrf-token match.
+    const csrfToken = req.cookies.csrfToken;
+    if (req.headers['x-csrf-token'] !== csrfToken) {
+      return res.status(403).send({ error: 'CSRF token mismatch' });
+    }
+
+    // If the jwtToken in the cookies is the same as the generated one, the user is authorized. 
+    const jwtToken = req.cookies.jwtToken;
+    const decoded = verifyToken(jwtToken);
+    if (!decoded){
+      return res.status(401).send({ error: 'Unauthorized' });
+    }
 
     // Make sure that user and post exists.
     const sql = `DELETE FROM dislike

@@ -23,8 +23,7 @@ export class ForumComponent {
 
   content: string;
 
-  // Current post for editing.
-  //currentPost : Post |undefined;
+  // The ID of the post to be edited.
   currentPostId = -1;
 
   constructor(private backend: BackendService, private cookieService: CookieService, private router: Router) {
@@ -72,7 +71,7 @@ export class ForumComponent {
   }
 
   /**
-   * Get the users liked post. 
+   * Get the users liked post.
    */
   getLikedPosts(){
     // Get liked posts.
@@ -102,9 +101,9 @@ export class ForumComponent {
   }
 
   /**
-   * Check if post is liked. 
-   * @param post 
-   * @returns 
+   * Check if post is liked.
+   * @param post
+   * @returns
    */
   isPostLiked(post: Post): boolean {
     return this.likedPosts.some(likedPost => likedPost.postId === post.postId);
@@ -134,17 +133,15 @@ export class ForumComponent {
       this.showAddBox = false;
     } else {
       this.showAddBox = true;
-    }    
+    }
   }
 
   /**
-   * Method for showing the edit post box.
+   * Sets the given post to be edited.
    */
   showEdit(post: Post) {
-
-    // Set current post to the one to be edited.
-    //this.currentPost = post;
     this.currentPostId = post.postId;
+    this.content = post.content;
   }
 
   /**

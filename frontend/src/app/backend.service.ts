@@ -56,7 +56,7 @@ export class BackendService {
 
   /**
    * Get all liked posts.
-   * @returns 
+   * @returns
    */
   getLikedPosts(): Observable<any> {
     const endpoint = this.API_URL + "/api/posts/liked/" + this.cookieService.get('userid'),
@@ -170,14 +170,25 @@ export class BackendService {
     const endpoint = this.API_URL + '/api/posts/' + post.postId;
     const body = {
       content: post.content,
-      user: post.user  
+      user: post.user
     }
     const options = {
       withCredentials: true
     };
-    
     const responseObservable = this.http.patch<Post>(endpoint, body, options);
     const responsePromise = firstValueFrom(responseObservable);
     return responsePromise;
+  }
+
+  logout(): Observable<any> {
+    const endpoint = this.API_URL + "/api/users/" + this.cookieService.get('username'),
+    options: {headers: any; observe: any; withCredentials: any} = {
+      headers: new HttpHeaders({
+        "Content-Type": "application/json",
+      }),
+      observe: "response",
+      withCredentials: true,
+    };
+    return this.http.get(endpoint, options);
   }
 }

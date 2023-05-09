@@ -25,7 +25,7 @@
                     <textarea rows="4" cols="79" maxlength="300" [(ngModel)]="content" name="content" required></textarea>
                   </label>&nbsp;<br>
                 <button type="button" (click)="submitEdit()">submit</button>
-            </div> 
+            </div>
 
             <div class="post_btns" *ngIf="post.postId != currentPostId">
                 <button type="button" (click)="like(post)" class="like" [ngClass]="{ 'blue': isPostLiked(post) }"><img id="thumb_up" src="assets/img/thumb_up.png" alt="thumbs up button"></button>

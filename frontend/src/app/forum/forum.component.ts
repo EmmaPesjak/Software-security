@@ -217,9 +217,17 @@ export class ForumComponent {
     .catch(error => console.error(`An error occurred when disliking the post: ${error}`));
   }
 
+  /**
+   * Logs out the user.
+   */
   logout(): void {
-    this.cookieService.delete('numberOfLoginAttemps');
-    this.cookieService.delete('username');
-    this.router.navigate(['/']);
+    console.log("HOLA");
+    this.backend.logout().subscribe((data) => {
+      // Clears the cookies set by the client.
+      this.cookieService.deleteAll('/');
+      this.router.navigate(['/']);
+    }, (exception) => {
+      console.log(exception.error); // TODO Add error handling.
+    });
   }
 }

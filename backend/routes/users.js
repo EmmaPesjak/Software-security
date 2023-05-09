@@ -1,5 +1,5 @@
 module.exports = function(db, app, crypto, createToken, verifyToken, sessionIds, csrfTokens) {
- 
+
   //* GET
   /**
    * Retrieves all users.
@@ -23,6 +23,40 @@ module.exports = function(db, app, crypto, createToken, verifyToken, sessionIds,
 
     // Finalizes the prepared statement to release its resources.
     stmt.finalize();
+  });
+
+  //* GET
+  /**
+   * Logs out the specified user.
+   */
+  app.get('/api/users/:userName', (req, res) => {
+    const userName = req.params.userName;
+
+    // Validates session.
+    if (!req.body.debug && (!sessionIds.has(userName) || req.cookies.ID !== sessionIds.get(userName))) {
+      return res.status(401).json('No active session.');
+    }
+    // Checks if the CSRF token is a match.
+    const csrfToken = req.cookies.csrfToken;
+    if (req.headers['x-csrf-token'] !== csrfToken) {
+      return res.status(403).json('CSRF token mismatch.');
+    }
+    // Checks if the JWT token is a match.
+    const jwtToken = req.cookies.jwtToken,
+    decoded = verifyToken(jwtToken);
+    if (!decoded){
+      return res.status(401).json('Unauthorized.');
+    }
+
+    // Clears session.
+    sessionIds.delete(userName);
+
+    // Clears the cookies set by the server.
+    res.clearCookie('ID');
+    res.clearCookie('csrfToken');
+    res.clearCookie('jwtToken');
+
+    return res.status(200).send();
   });
 
   //* POST
@@ -72,7 +106,7 @@ module.exports = function(db, app, crypto, createToken, verifyToken, sessionIds,
         // Create a JWT token and send in a cookie.
         const jwtBearerToken = createToken(userName);
         res.cookie("jwtToken", jwtBearerToken, {secure: true, maxAge: 1000 * 60 * 60});
-        
+
         //res.cookie('token', token, options);
         res.status(200).json(row);
       }
@@ -109,7 +143,6 @@ module.exports = function(db, app, crypto, createToken, verifyToken, sessionIds,
     stmt.bind(userName, hashedPassword, name, email);
 
     // Executes the prepared statement and returns the result.
-    
     stmt.get(function(err, row) {
       if (err) {
         if (err.code === 'SQLITE_CONSTRAINT') {
@@ -126,8 +159,4 @@ module.exports = function(db, app, crypto, createToken, verifyToken, sessionIds,
     // Finalizes the prepared statement to release its resources.
     stmt.finalize();
   });
-
 }
-
-
-

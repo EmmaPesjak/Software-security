@@ -6,7 +6,15 @@ crypto = require('crypto'),
 cookieParser = require('cookie-parser'),
 users = require('./routes/users'),
 posts = require('./routes/posts'),
-token = require('./token.js');
+token = require('./token.js'),
+rateLimit = require('express-rate-limit');
+
+const limiter = rateLimit({
+    windowMs: 60 * 60 * 1000, // 1 hour
+    max: 20,   // 20 requests
+    message: "Too many requests from this IP, please try again after an hour"
+  });
+
 
 
 const Tokens = require('csrf');
@@ -52,8 +60,8 @@ if (db) {
     const sessionIds = new Map();
 
     // Exports `db`, `app`, `crypto`, `createToken`, `verifyToken`, and `sessionIds`.
-    users(db, app, crypto, token.createToken, token.verifyToken, sessionIds, csrfTokens);
-    posts(db, app, token.createToken, token.verifyToken, sessionIds, csrfTokens);
+    users(db, app, crypto, token.createToken, token.verifyToken, sessionIds, csrfTokens, limiter);
+    posts(db, app, token.createToken, token.verifyToken, sessionIds, csrfTokens, limiter);
 }
 
 // // Closes the connection to the DB.

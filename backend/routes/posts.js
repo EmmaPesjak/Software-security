@@ -1,6 +1,6 @@
 // const { verifyToken } = require('../token.js');
 
-module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTokens) {
+module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTokens, limiter) {
 
   //TODO verify CSRF in all (or atleast POST etc) endpoints
 
@@ -92,7 +92,7 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTok
   /**
    * Creates a post.
    */
-  app.post('/api/posts', (req, res) => {
+  app.post('/api/posts', limiter, (req, res) => {
     const {content} = req.body;
 
     // Check if csrf-token match.
@@ -274,7 +274,7 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTok
   /**
    * Updates the specified post.
    */
-  app.patch('/api/posts/:postId', (req, res) => {
+  app.patch('/api/posts/:postId', limiter, (req, res) => {
     const postId = req.params.postId;
     const user = req.body.user;  // userID
     const content = req.body.content;
@@ -321,7 +321,7 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTok
   /**
    * Deletes the specified post.
    */
-  app.delete('/api/posts/:id', (req, res) => {
+  app.delete('/api/posts/:id', limiter, (req, res) => {
     const postId = req.params.id,
     userId = Number(req.cookies.userid);
 

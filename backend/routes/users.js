@@ -1,4 +1,4 @@
-module.exports = function(db, app, crypto, createToken, verifyToken, sessionIds, csrfTokens) {
+module.exports = function(db, app, crypto, createToken, verifyToken, sessionIds, csrfTokens, limiter) {
 
   //* GET
   /**
@@ -63,7 +63,7 @@ module.exports = function(db, app, crypto, createToken, verifyToken, sessionIds,
   /**
    * Logs in the specified user.
    */
-  app.post('/api/users/:userName', (req, res) => {
+  app.post('/api/users/:userName', limiter, (req, res) => {
     const userName = req.params.userName,
     password = req.body.password,
     hashedPassword = sha256(password);
@@ -129,7 +129,7 @@ module.exports = function(db, app, crypto, createToken, verifyToken, sessionIds,
   /**
    * Creates a user.
    */
-  app.post('/api/users', function (req, res) {
+  app.post('/api/users', limiter, function (req, res) {
     const {name, userName, email, password} = req.body,
     hashedPassword = sha256(password);
 

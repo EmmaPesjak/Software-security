@@ -13,6 +13,7 @@ import { RegisterComponent } from './register/register.component';
 import { SearchComponent } from './search/search.component';
 import { AuthInterceptor } from './auth.interceptor';
 
+
 @NgModule({
   declarations: [
     AppComponent,

@@ -1,6 +1,6 @@
 // const { verifyToken } = require('../token.js');
 
-module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTokens, limiter, postSchema) {
+module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTokens, limiter, postSchema, body, validationResult) {
 
   //TODO verify CSRF in all (or atleast POST etc) endpoints
 
@@ -10,12 +10,6 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTok
    */
   app.get('/api/users/:userName/posts', (req, res) => {
     const userName = req.params.userName;
-
-    // TODO Use `verifyToken` instead.
-    //if (!req.body.debug && (!sessionIds.has(userName) || req.cookies.ID !== sessionIds.get(userName))){
-    //  console.log("No logged in user");
-    //  return;
-    //} //return res.redirect('/');//return res.status(401).json({"error": "No active session."});
 
     if (!req.body.debug && (!sessionIds.has(userName) || req.cookies.ID !== sessionIds.get(userName))) {
       return res.status(401).json({"error":'No active session.'});
@@ -92,14 +86,24 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTok
   /**
    * Creates a post.
    */
-  app.post('/api/posts', limiter, (req, res) => {
-    const {content} = req.body;
+  app.post('/api/posts', limiter, [
+    body('content').trim().escape()
+  ], (req, res) => {
 
-    // Validate post input.
-    const validationResult = postSchema.validate(req.body);
-    if (validationResult.error) {
-      return res.status(400).json({error: validationResult.error.details[0].message});
+    // Catch potential <html> and javascript code.
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(422).json({ errors: errors.array() });
     }
+
+    // Validate user input against the Joi schema.
+    const validationJoi = postSchema.validate(req.body);
+    if (validationJoi.error) {
+      return res.status(400).json({error: validationJoi.error.details[0].message});
+    }
+
+    // Get validated fields from Joi.
+    const {content} = validationJoi.value;
 
     // Check if csrf-token match.
     const csrfToken = req.cookies.csrfToken;

@@ -28,7 +28,7 @@ export class HomeComponent {
           this.cookieService.set('numberOfLoginAttempts', '0', undefined, '/');
           this.cookieService.delete('timer', '/');
         } else if (parseInt(this.cookieService.get('numberOfLoginAttempts')) >= 5) {
-          this.message = 'You\'ve exceeded the maximum number of login attempts.';
+          this.message = 'You\'ve exceeded the maximum number of login attempts. Try again later.';
           if (!this.cookieService.check('timer')) {
             const date: Date = new Date();
             date.setMinutes(date.getMinutes() + 5);
@@ -46,7 +46,7 @@ export class HomeComponent {
         this.cookieService.set('userid', data.body.userId, undefined, '/');
         this.router.navigate(['/forum']);
       }, (exception) => {
-        this.message = exception.error;
+        this.message = exception.error + ' Number of login attempts: ' + parseInt(this.cookieService.get('numberOfLoginAttempts')) + '/5.';
       });
     }
   }

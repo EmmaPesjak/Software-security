@@ -42,20 +42,20 @@ export class RegisterComponent {
    */
   addUser() {
 
-    // ADDED BY EBBA TO CHECK PASSWORD MATCH
+    // CHECK PASSWORD MATCH
     if (this.password !== this.passwordRepeat) {
       this.displayMessage("Passwords do not match");
       return;
     }
 
-    // ADDED BY EBBA TO CHECK IF VALID EMAIL
+    // Verif email.
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(this.email)) {
       this.displayMessage("Invalid email address");
       return;
     }
 
-    // ADDED BY EBBA TO CHECK STRONG PASSWORD
+    // Verif password.
     const smallLetters = /.*[a-z].*/.test(this.password);
     const bigLetters = /.*[A-Z].*/.test(this.password);
     const numbers = /.*[0-9].*/.test(this.password);
@@ -64,7 +64,6 @@ export class RegisterComponent {
     const containsUserName = this.password.toLowerCase().includes(this.userName.toLowerCase());
     const length = this.password.length;
 
-    // ADDED BY EBBA TO CHECK IF ANY ARE FALSE RESULTS // EMMA FORMULERADE TEXTEN SNYGGARE
     if (!smallLetters || !bigLetters || !numbers || !specialChars || length < 12 || containsName || containsUserName){
       this.displayMessage("Your password must contain: lowercase letters, uppercase letters, numbers, special symbols, have a minimum length of 12 characters, and cannot include your name or username.");
       return;

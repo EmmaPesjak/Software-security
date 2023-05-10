@@ -31,14 +31,6 @@ export class AuthInterceptor implements HttpInterceptor {
         headers: headers
       });
 
-      /*const cloned = request.clone({
-        headers: request.headers.set("Authorization", "Bearer " + csrfToken)
-      });
-
-      if (jwtToken) {
-        cloned.headers = cloned.headers.set("Authorization", "Bearer " + jwtToken);
-      }*/
-
       return next.handle(cloned);
     } else {
       return next.handle(request);

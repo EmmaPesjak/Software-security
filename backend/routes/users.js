@@ -1,4 +1,4 @@
-module.exports = function(db, app, crypto, createToken, verifyToken, sessionIds, csrfTokens, limiter) {
+module.exports = function(db, app, crypto, createToken, verifyToken, sessionIds, csrfTokens, limiter, userSchema) {
 
   //* GET
   /**
@@ -130,7 +130,17 @@ module.exports = function(db, app, crypto, createToken, verifyToken, sessionIds,
    * Creates a user.
    */
   app.post('/api/users', limiter, function (req, res) {
-    const {name, userName, email, password} = req.body,
+
+    // Validate user input against the Joi schema.
+    const validationResult = userSchema.validate(req.body);
+    if (validationResult.error) {
+      return res.status(400).json({ error: validationResult.error.details[0].message });
+    }
+
+    // Get validated fields from Joi.
+    const { email, password, name, userName } = validationResult.value;
+
+    // const {name, userName, email, password} = req.body,
     hashedPassword = sha256(password);
 
     // The SQL query to create a user.

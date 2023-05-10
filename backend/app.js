@@ -8,7 +8,8 @@ users = require('./routes/users'),
 posts = require('./routes/posts'),
 token = require('./token.js'),
 rateLimit = require('express-rate-limit'),
-helmet = require("helmet");
+helmet = require("helmet"),
+schema = require('./schemas.js');
 
 
 const limiter = rateLimit({
@@ -64,9 +65,9 @@ if (db) {
 
     const sessionIds = new Map();
 
-    // Exports `db`, `app`, `crypto`, `createToken`, `verifyToken`, and `sessionIds`.
-    users(db, app, crypto, token.createToken, token.verifyToken, sessionIds, csrfTokens, limiter);
-    posts(db, app, token.createToken, token.verifyToken, sessionIds, csrfTokens, limiter);
+    // Exports `db`, `app`, `crypto`, `createToken`, `verifyToken`, `sessionIds`, csrfTokens, limiter, and joi.
+    users(db, app, crypto, token.createToken, token.verifyToken, sessionIds, csrfTokens, limiter, schema.userSchema);
+    posts(db, app, token.createToken, token.verifyToken, sessionIds, csrfTokens, limiter, schema.postSchema);
 }
 
 // // Closes the connection to the DB.

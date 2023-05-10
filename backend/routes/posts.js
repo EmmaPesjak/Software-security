@@ -1,6 +1,6 @@
 // const { verifyToken } = require('../token.js');
 
-module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTokens, limiter) {
+module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTokens, limiter, postSchema) {
 
   //TODO verify CSRF in all (or atleast POST etc) endpoints
 
@@ -94,6 +94,12 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTok
    */
   app.post('/api/posts', limiter, (req, res) => {
     const {content} = req.body;
+
+    // Validate post input.
+    const validationResult = postSchema.validate(req.body);
+    if (validationResult.error) {
+      return res.status(400).json({error: validationResult.error.details[0].message});
+    }
 
     // Check if csrf-token match.
     const csrfToken = req.cookies.csrfToken;
@@ -276,8 +282,17 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTok
    */
   app.patch('/api/posts/:postId', limiter, (req, res) => {
     const postId = req.params.postId;
-    const user = req.body.user;  // userID
-    const content = req.body.content;
+    // const user = req.body.user;  // userID
+    // const content = req.body.content;
+
+    // Validate post input.
+    const validationResult = postSchema.validate(req.body);
+    if (validationResult.error) {
+      return res.status(400).json({error: validationResult.error.details[0].message});
+    }
+
+    // Get validated fields from Joi.
+    const { user, content } = validationResult.value;
 
     // Check if csrf-token match.
     const csrfToken = req.cookies.csrfToken;
@@ -528,3 +543,4 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTok
     }
   }
 }
+

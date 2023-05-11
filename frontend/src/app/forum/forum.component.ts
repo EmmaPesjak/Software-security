@@ -139,9 +139,9 @@ export class ForumComponent {
 
     // Update the content of the post at that index.
     if (index !== -1) {
+      // TODO: DETTA GÖR ATT EDITEN SER OK UT ÄVEN OM DET INTE HAR ÄNDRATS I DATABASEN!!!
+      // MEN TAR MAN BORT DEN SÅ SKICKAS INTE DEN EDITADE TEXTEN MED???
       this.posts[index].content = this.content;
-
-
       // Call the backend service to update the post in the database.
       this.backend.editPost(this.posts[index])
         .then(() => {
@@ -205,7 +205,6 @@ export class ForumComponent {
    * Logs out the user.
    */
   logout(): void {
-    console.log("HOLA");
     this.backend.logout().subscribe((data) => {
       // Clears the cookies set by the client.
       this.cookieService.deleteAll('/');

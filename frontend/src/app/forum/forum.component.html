@@ -15,7 +15,6 @@
 
     <ng-container *ngFor="let post of posts">
         <div class="forum-post" *ngIf="searchText === '' || post.content.toLowerCase().includes(searchText.toLowerCase()) || post.name.toLowerCase().includes(searchText.toLowerCase())">
-
             <div class="post-name"><b>{{ post.name }}</b></div>
             <div class="post-username">@{{ post.username }}</div>
             <div class="post-content">{{ post.content }}</div>
@@ -27,15 +26,13 @@
                 <button type="button" (click)="submitEdit()">submit</button>
             </div>
 
-            <div class="post-btns" *ngIf="post.postId != currentPostId">
-                <button type="button" (click)="like(post)" class="like" [ngClass]="{ 'blue': isPostLiked(post) }"><img id="thumb-up" src="assets/img/thumb_up.png" alt="thumbs up button"></button>
+            <div class="post_btns" *ngIf="post.postId != currentPostId">
+                <button type="button" (click)="like(post)" class="like" [ngClass]="{'green': post.likedByUser == 1}"><img id="thumb_up" src="assets/img/thumb_up.png" alt="thumbs up button"></button>
                 <p>{{ post.likes }}</p>
-                <button type="button" (click)="dislike(post)" class="dislike"><img id="thumb-down" src="assets/img/thumb_down.png" alt="thumbs down button"></button>
+                <button type="button" (click)="dislike(post)" class="dislike" [ngClass]="{'green': post.dislikedByUser == 1}"><img id="thumb-down" src="assets/img/thumb_down.png" alt="thumbs down button"></button>
                 <p>{{ post.dislikes }}</p>
-                <button type="button" (click)="deletePost(post)" *ngIf="loggedinUser=== post.username || loggedinUser === 'admin'" class="delete">Delete</button>
-
-                <!-- Ändrat till showEdit(post) för att sätta current post för editing. -->
-                <button type="button" (click)="showEdit(post)" *ngIf="loggedinUser=== post.username" class="edit">Edit</button>
+                <button type="button" (click)="deletePost(post)" *ngIf="loggedinUser === post.username || loggedinUser === 'admin'" class="delete">Delete</button>
+                <button type="button" (click)="showEdit(post)" *ngIf="loggedinUser === post.username" class="edit">Edit</button>
             </div>
         </div>
     </ng-container>

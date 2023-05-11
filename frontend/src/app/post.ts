@@ -9,5 +9,6 @@ export interface Post {
     content: string;
     likes: number;
     dislikes: number;
-    likedByUser: boolean;
+    likedByUser: number;
+    dislikedByUser: number;
 }

@@ -10,10 +10,7 @@ import { Post } from '../post';
   styleUrls: ['./forum.component.css']
 })
 export class ForumComponent {
-
-  // Create lists of all posts and liked posts.
   posts: Post[];
-  likedPosts: Post[];
 
   showAddBox = false;
   searchText: string = "";
@@ -26,7 +23,6 @@ export class ForumComponent {
   constructor(private backend: BackendService, private cookieService: CookieService, private router: Router) {
     this.content = "";
     this.posts = [];
-    this.likedPosts = [];
   }
 
   /**
@@ -35,8 +31,8 @@ export class ForumComponent {
   ngOnInit(): void {
     this.loggedinUser = this.cookieService.get('username');
     this.getPosts();
-    this.getLikedPosts();  // #TODO KIRRA FORFEN
-    this.mapPosts();
+    // this.getLikedPosts();
+    // this.mapPosts();
   }
 
   /**
@@ -48,50 +44,51 @@ export class ForumComponent {
       (response) => {
         this.posts = response.body;
       },
-      (error) => {
-        console.log(error);
+      (exception) => {
+        console.log(exception.error);
         this.router.navigate(['']);
       }
     );
   }
 
-  /**
-   * Get the users liked posts from the backend.
-   */
-  getLikedPosts(){
-    this.backend.getLikedPosts().subscribe(
-      (response) => {
-        this.likedPosts = response.body;
-      },
-      (error) => {
-        console.log(error);
-      }
-    );
-  }
+  // /**
+  //  * Get the users liked post.
+  //  */
+  // getLikedPosts(){
+  //   // Get liked posts.
+  //   this.backend.getLikedPosts().subscribe(
+  //     (response) => {
+  //       this.likedPosts = response.body;
+  //     },
+  //     (error) => {
+  //       console.log(error);
+  //     }
+  //   );
+  // }
 
-  /**
-   * Flag if post is liked or not.
-   */
-  mapPosts(){
-    this.posts.forEach(post => {
-      // Check if the post is in the likedPosts array
-      if (this.likedPosts.some(likedPost => likedPost.postId === post.postId)) {
-        // Set the `liked` flag to `true`
-        post.likedByUser = true;
-      } else {
-        post.likedByUser = false;
-      }
-    });
-  }
+  // /**
+  //  * Flag if post is liked or not.
+  //  */
+  // mapPosts(){
+  //   this.posts.forEach(post => {
+  //     // Check if the post is in the likedPosts array
+  //     if (this.likedPosts.some(likedPost => likedPost.postId === post.postId)) {
+  //       // Set the `liked` flag to `true`
+  //       post.likedByUser = true;
+  //     } else {
+  //       post.likedByUser = false;
+  //     }
+  //   });
+  // }
 
-  /**
-   * Check if post is liked.
-   * @param post is the post.
-   * @returns a boolean stating whether it is liked or not.
-   */
-  isPostLiked(post: Post): boolean {
-    return this.likedPosts.some(likedPost => likedPost.postId === post.postId);
-  }
+  // /**
+  //  * Check if post is liked.
+  //  * @param post
+  //  * @returns
+  //  */
+  // isPostLiked(post: Post): boolean {
+  //   return this.likedPosts.some(likedPost => likedPost.postId === post.postId);
+  // }
 
   /**
    * Method for filtering the posts based on the inputted search text.
@@ -185,8 +182,8 @@ export class ForumComponent {
     this.backend.likePost(post)
     .then(() => {
       this.getPosts();
-    })   // #TODO don't catch error??? the error is most likely that the user hasnt disliked before (see backend code)
-    .catch(error => console.error(`An error occurred when liking the post: ${error.message}`));
+    })
+    .catch((exception) => console.error(`An error occurred when liking the post: ${exception.error}.`));
   }
 
   /**
@@ -197,8 +194,8 @@ export class ForumComponent {
     this.backend.dislikePost(post)
     .then(() => {
       this.getPosts();
-    }) // #TODO don't catch error??? the error is most likely that the user hasnt liked before (see backend code)
-    .catch(error => console.error(`An error occurred when disliking the post: ${error}`));
+    })
+    .catch((exception) => console.error(`An error occurred when disliking the post: ${exception.error}.`));
   }
 
   /**

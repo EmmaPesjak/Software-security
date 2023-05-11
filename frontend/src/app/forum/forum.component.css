@@ -29,8 +29,8 @@
     border: none;
 }
 
-.blue {
-    background-color: blue;
+.green {
+    background-color: green;
 }
 
 .delete, .edit {
@@ -53,6 +53,6 @@ textarea {
     font-family: 'Montserrat', sans-serif;
 }
 
-.post-content { 
-    word-break: break-all; 
+.post-content {
+    word-break: break-all;
 }

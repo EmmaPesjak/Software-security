@@ -1,9 +1,9 @@
-.top_container {
+.top-container {
     width: 50%;
     text-align: left;
 }
 
-.forum_post {
+.forum-post {
     background-color: rgba(255, 255, 255, 0.705);
     border-radius: .25em;
     color: rgb(2, 45, 40);
@@ -13,7 +13,7 @@
     text-align: left;
 }
 
-.post_content {
+.post-content {
     margin-left: .2em;
     margin-top: .2em;
 }
@@ -38,12 +38,12 @@
     margin-bottom: .8em;
 }
 
-.post_btns {
+.post-btns {
     display: flex;
     flex-direction: row;
 }
 
-.add_box {
+.add-box {
     text-align: left;
     margin-top: 1em;
     margin-bottom: 1em;
@@ -53,6 +53,6 @@ textarea {
     font-family: 'Montserrat', sans-serif;
 }
 
-.post_content { 
+.post-content { 
     word-break: break-all; 
 }

@@ -27,13 +27,10 @@ export class AddPostComponent {
   }
 
   /**
-   * Method for adding a post, communicate all input to the backend service.
-   * Since the required attribute is used in each form item in the HTML, no further validation of the
-   * user input is needed here.
+   * Method for adding a post, communicats the input to the backend service.
    */
   addPost() {
     let addPostPromise: Promise<Post>;
-
     addPostPromise = this.backend.addPost(this.content);
 
     // Call the handle methods depending on the outcome of the promise.
@@ -56,7 +53,6 @@ export class AddPostComponent {
 
     // Emit the post so that the parent component can update the list of posts.
     this.newPostEvent.emit(post)
-
   }
 
   /**

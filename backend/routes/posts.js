@@ -1,6 +1,6 @@
 // const { verifyToken } = require('../token.js');
 
-module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTokens, limiter, postSchema, body, validationResult) {
+module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTokens, limiter, body, validationResult) {
 
   //TODO verify CSRF in all (or atleast POST etc) endpoints
 
@@ -105,14 +105,8 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTok
       return res.status(422).json({ errors: errors.array() });
     }
 
-    // Validate user input against the Joi schema.
-    const validationJoi = postSchema.validate(req.body);
-    if (validationJoi.error) {
-      return res.status(400).json({message: validationJoi.error.details[0].message});
-    }
-
-    // Get validated fields from Joi.
-    const {content} = validationJoi.value;
+    // Get validated fields.
+    const {content} = req.body;
 
     // Check if csrf-token match.
     const csrfToken = req.cookies.csrfToken;
@@ -301,20 +295,19 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTok
   /**
    * Updates the specified post.
    */
-  app.patch('/api/posts/:postId', limiter, (req, res) => {
-    const postId = req.params.postId;
-    // const user = req.body.user;  // userID
-    // const content = req.body.content;
-    // Validate post input.
-    const validationResult = postSchema.validate(req.body);
-    if (validationResult.error) {
-      // Här fastnar alla requests för mig och säger typ att user must be a string
-      console.log(validationResult.error.details[0].message);
-      console.log(validationResult.value);
-      return res.status(400).json({error: validationResult.error.details[0].message});
+  app.patch('/api/posts/:postId', limiter, 
+  body('content').trim().escape(), 
+  (req, res) => {
+
+    // Catch potential <html> and javascript code.
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(422).json({ errors: errors.array() });
     }
-    // Get validated fields from Joi.
-    const { user, content } = validationResult.value;
+
+    const postId = req.params.postId;
+    // Get validated fields.
+    const { user, content } = req.body;
 
     // Check if csrf-token match.
     const csrfToken = req.cookies.csrfToken;

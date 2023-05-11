@@ -1,4 +1,4 @@
-module.exports = function(db, app, crypto, createToken, verifyToken, sessionIds, csrfTokens, limiter, userSchema, body, validationResult ) {
+module.exports = function(db, app, crypto, createToken, verifyToken, sessionIds, csrfTokens, limiter, body, validationResult ) {
 
   //* GET
   /**
@@ -134,6 +134,16 @@ module.exports = function(db, app, crypto, createToken, verifyToken, sessionIds,
     return hash.digest('hex');
   }
 
+  function generateSalt(length) {
+    return crypto.randomBytes(Math.ceil(length / 2)).toString('hex').slice(0, length);
+  }
+  
+  function hashPassword(password, salt) {
+    const hash = crypto.createHmac('sha256', salt);
+    hash.update(password);
+    return hash.digest('hex');
+  }
+
   //* POST
   /**
    * Creates a user, by first validating userinput against <html> or javascript code.
@@ -151,16 +161,13 @@ module.exports = function(db, app, crypto, createToken, verifyToken, sessionIds,
       return res.status(422).json({ errors: errors.array() });
     }
 
-    // Validate user input against the Joi schema.
-    const validationJoi = userSchema.validate(req.body);
-    if (validationJoi.error) {
-      return res.status(400).json({ message: validationJoi.error.details[0].message });
-    }
+    // Get validated fields.
+    const { email, password, name, userName } = req.body;
 
-    // Get validated fields from Joi.
-    const { email, password, name, userName } = validationJoi.value;
+    //hashedPassword = sha256(password);
 
-    hashedPassword = sha256(password);
+    const salt = generateSalt(16);
+    const hashedPassword = hashPassword(password, salt);
 
     // The SQL query to create a user.
     const sql = 'INSERT INTO user(username, hashedPassword, name, email) VALUES (?, ?, ?, ?) RETURNING *';

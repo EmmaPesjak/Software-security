@@ -138,12 +138,17 @@ export class ForumComponent {
     if (index !== -1) {
       // TODO: DETTA GÖR ATT EDITEN SER OK UT ÄVEN OM DET INTE HAR ÄNDRATS I DATABASEN!!!
       // MEN TAR MAN BORT DEN SÅ SKICKAS INTE DEN EDITADE TEXTEN MED???
-      this.posts[index].content = this.content;
+      //this.posts[index].content = this.content;
+
+      // Make a shallow copy of the post and with the new content. 
+      const updatedPost = { ...this.posts[index], content: this.content };
       // Call the backend service to update the post in the database.
-      this.backend.editPost(this.posts[index])
+      this.backend.editPost(updatedPost)
         .then(() => {
           this.getPosts();
-        })
+          // Update the post in the frontend if the backend update is successful.
+          this.posts[index] = updatedPost;
+          })
         .catch(error => console.error(`An error occurred when editing the post: ${error}`));
     }
 

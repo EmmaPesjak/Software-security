@@ -99,7 +99,7 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTok
     // Validate user input against the Joi schema.
     const validationJoi = postSchema.validate(req.body);
     if (validationJoi.error) {
-      return res.status(400).json({error: validationJoi.error.details[0].message});
+      return res.status(400).json({message: validationJoi.error.details[0].message});
     }
 
     // Get validated fields from Joi.
@@ -108,6 +108,7 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTok
     // Check if csrf-token match.
     const csrfToken = req.cookies.csrfToken;
     if (req.headers['x-csrf-token'] !== csrfToken) {
+      
       return res.status(403).send({ error: 'CSRF token mismatch' });
     }
 
@@ -288,13 +289,14 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTok
     const postId = req.params.postId;
     // const user = req.body.user;  // userID
     // const content = req.body.content;
-
     // Validate post input.
     const validationResult = postSchema.validate(req.body);
     if (validationResult.error) {
+      // Här fastnar alla requests för mig och säger typ att user must be a string
+      console.log(validationResult.error.details[0].message);
+      console.log(validationResult.value);
       return res.status(400).json({error: validationResult.error.details[0].message});
     }
-
     // Get validated fields from Joi.
     const { user, content } = validationResult.value;
 

@@ -20,7 +20,6 @@
     border: 1px solid rgb(2, 45, 40);
 }
 
-/* The actual popup (appears on top) */
 .popup .popuptext {
     visibility: hidden;
     width: 230px;
@@ -36,7 +35,6 @@
     margin-left: -121px;
 }
 
-/* Popup arrow */
 .popup .popuptext::after {
     content: "";
     position: absolute;
@@ -48,11 +46,8 @@
     border-color: #555 transparent transparent transparent;
 }
 
-/* Toggle this class when clicking on the popup container (hide and show the popup) */
 .popup .show {
     visibility: visible;
     padding-left: .4em;
     padding-right: .4em;
 }
-
-

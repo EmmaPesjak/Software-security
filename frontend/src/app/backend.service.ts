@@ -56,7 +56,7 @@ export class BackendService {
 
   /**
    * Get all liked posts.
-   * @returns
+   * @returns an observable.
    */
   getLikedPosts(): Observable<any> {
     const endpoint = this.API_URL + "/api/posts/liked/" + this.cookieService.get('userid'),
@@ -75,10 +75,10 @@ export class BackendService {
    * @param post is the post with all its attributes to add.
    * @returns a Promise that resolves to an added post.
    */
-  addPost(contenthej: string) {
+  addPost(postContent: string) {
     const endpoint = this.API_URL + '/api/posts';
     const body = {
-      content: contenthej,
+      content: postContent,
       username: this.cookieService.get('username'),
     };
     const options = {
@@ -180,6 +180,10 @@ export class BackendService {
     return responsePromise;
   }
 
+  /**
+   * Log out a user.
+   * @returns an observable.
+   */
   logout(): Observable<any> {
     const endpoint = this.API_URL + "/api/users/" + this.cookieService.get('username'),
     options: {headers: any; observe: any; withCredentials: any} = {

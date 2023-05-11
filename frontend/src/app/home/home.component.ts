@@ -8,6 +8,10 @@ import { CookieService } from 'ngx-cookie-service';
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css']
 })
+
+/**
+ * Component for the home page.
+ */
 export class HomeComponent {
   username: string = '';
   password: string = '';
@@ -21,6 +25,9 @@ export class HomeComponent {
     }
   }
 
+  /**
+   * Method for logging in the user.
+   */
   login(): void {
     if (this.username.length > 0 && this.password.length > 0) {
       if (this.cookieService.check('numberOfLoginAttempts')) {

@@ -13,11 +13,8 @@ export class ForumComponent {
   posts: Post[];
 
   showAddBox = false;
-
   searchText: string = "";
-
   loggedinUser = "";
-
   content: string;
 
   // The ID of the post to be edited.
@@ -39,11 +36,10 @@ export class ForumComponent {
   }
 
   /**
-   * Get the courses for the table element from the backend.
+   * Get the posts for the table element from the backend.
    */
   getPosts() {
-
-    // Get posts. If there was an error, redirect to home.
+    // Get posts. If there is an error, redirect to home.
     this.backend.getPosts().subscribe(
       (response) => {
         this.posts = response.body;
@@ -102,9 +98,11 @@ export class ForumComponent {
     this.searchText = searchValue;
   }
 
-  // #TODO the view only updates the content, but not the other associated info to post. getPost???
+  /**
+   * Updates the list of posts with the new post and updates the page.
+   * @param newPost is the new post.
+   */
   onNewPost(newPost: Post) {
-    // Update the list of posts with the new post
     this.posts.push(newPost);
     this.getPosts();
   }
@@ -133,7 +131,6 @@ export class ForumComponent {
    * Edit a post.
    */
   submitEdit() {
-
     // Find the index of the post being edited using currentPostId.
     const index = this.posts.findIndex(post => post.postId === this.currentPostId);
 
@@ -163,7 +160,6 @@ export class ForumComponent {
   deletePost(post: Post) {
     this.backend.deletePost(post)
       .then(() => {
-
         // Get the index of the post in the array.
         const postIndex = this.posts.findIndex(postInArray => postInArray.postId == post.postId);
 

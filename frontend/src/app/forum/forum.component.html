@@ -1,6 +1,6 @@
 <main>
     <div>@{{loggedinUser}}</div>
-    <div class="top_container">
+    <div class="top-container">
         <app-search (searchTextChanged)="onSearchTextChanged($event)"></app-search>
 
         <button (click)="logout()" id="logout" type="button">Log out</button>
@@ -14,13 +14,13 @@
     </div>
 
     <ng-container *ngFor="let post of posts">
-        <div class="forum_post" *ngIf="searchText === '' || post.content.toLowerCase().includes(searchText.toLowerCase()) || post.name.toLowerCase().includes(searchText.toLowerCase())">
+        <div class="forum-post" *ngIf="searchText === '' || post.content.toLowerCase().includes(searchText.toLowerCase()) || post.name.toLowerCase().includes(searchText.toLowerCase())">
 
-            <div class="post_name"><b>{{ post.name }}</b></div>
-            <div class="post_username">@{{ post.username }}</div>
-            <div class="post_content">{{ post.content }}</div>
+            <div class="post-name"><b>{{ post.name }}</b></div>
+            <div class="post-username">@{{ post.username }}</div>
+            <div class="post-content">{{ post.content }}</div>
 
-            <div class="edit_box" *ngIf="post.postId === currentPostId">
+            <div class="edit-box" *ngIf="post.postId === currentPostId">
                 <label>Edit content:<br>
                     <textarea rows="4" cols="79" maxlength="300" [(ngModel)]="content" name="content" required></textarea>
                   </label>&nbsp;<br>
@@ -30,7 +30,7 @@
             <div class="post_btns" *ngIf="post.postId != currentPostId">
                 <button type="button" (click)="like(post)" class="like" [ngClass]="{ 'blue': post.likedByUser == 1 }"><img id="thumb_up" src="assets/img/thumb_up.png" alt="thumbs up button"></button>
                 <p>{{ post.likes }}</p>
-                <button type="button" (click)="dislike(post)" class="dislike"><img id="thumb_down" src="assets/img/thumb_down.png" alt="thumbs down button"></button>
+                <button type="button" (click)="dislike(post)" class="dislike"><img id="thumb-down" src="assets/img/thumb_down.png" alt="thumbs down button"></button>
                 <p>{{ post.dislikes }}</p>
                 <button type="button" (click)="deletePost(post)" *ngIf="loggedinUser === post.username || loggedinUser === 'admin'" class="delete">Delete</button>
                 <button type="button" (click)="showEdit(post)" *ngIf="loggedinUser === post.username" class="edit">Edit</button>

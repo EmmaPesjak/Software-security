@@ -11,6 +11,7 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTok
   app.get('/api/users/:userName/posts', (req, res) => {
     const userName = req.params.userName;
 
+    // Validates session.
     if (!req.body.debug && (!sessionIds.has(userName) || req.cookies.ID !== sessionIds.get(userName))) {
       return res.status(401).json({"error":'No active session.'});
     }
@@ -18,10 +19,18 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTok
     // The SQL query to retrieve all posts..
     const sql = `
     SELECT p.*, u.username, u.name,
-    (SELECT DISTINCT COUNT(l.user) FROM like AS l WHERE l.post = p.postId) AS likes,
-    (SELECT DISTINCT COUNT(d.user) FROM dislike AS d WHERE d.post = p.postId) AS dislikes
-    FROM post AS p
-    INNER JOIN user AS u ON p.user = u.userId
+    (SELECT COUNT(l.user) FROM like AS l WHERE l.post = p.postId) AS likes,
+    (SELECT COUNT(d.user) FROM dislike AS d WHERE d.post = p.postId) AS dislikes,
+    CASE WHEN (SELECT l.user FROM like AS l WHERE l.post = p.postId AND l.user = u.userId) IS NULL
+      THEN 0
+      ELSE 1
+    END AS likedByUser,
+    CASE WHEN (SELECT d.user FROM dislike AS d WHERE d.post = p.postId AND d.user = u.userId) IS NULL
+      THEN 0
+      ELSE 1
+    END AS dislikedByUser
+    FROM post AS p, user AS u
+    WHERE p.user = u.userId
     `;
 
     // Prepares the SQL statement.
@@ -31,7 +40,7 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTok
     stmt.all(function(err, rows) {
       if (err) {
         console.error(err.message);
-        res.status(500).json({"error": "Internal Server Error."});
+        res.status(500).json('Internal Server Error.');
       } else {
         res.status(200).json(rows);
       }
@@ -399,46 +408,6 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTok
   });
 
   /**
-   * Get the liked posts for the user.
-   */
-  app.get('/api/posts/liked/:userId', (req, res) => {
-    const userId = req.params.userId;
-    const sql = 'SELECT post FROM like WHERE user = ?';
-    const stmt = db.prepare(sql);
-
-    stmt.all(userId, function(err, rows) {
-      if (err) {
-        console.error(err.message);
-        res.status(500).json({"error": "Internal Server Error."});
-      } else {
-        res.status(200).send(rows);
-      }
-    });
-
-    stmt.finalize();
-  });
-
-  app.get('/api/posts/disliked/:userId', (req, res) => {
-    const userId = req.params.userId;
-    const sql = 'SELECT post FROM dislike WHERE user = ?';
-    const stmt = db.prepare(sql);
-
-    stmt.all(userId, function(err, rows) {
-      if (err) {
-        console.error(err.message);
-        res.status(500).json({"error": "Internal Server Error."});
-      } else {
-        const postIds = rows.map(row => row.post);
-        res.status(200).send(postIds);
-      }
-    });
-
-    stmt.finalize();
-  });
-
-  // REMOVE ???????
-
-  /**
    * Deletes the specified like.
    */
   app.delete('/api/posts/like/:postId', (req, res) => {
@@ -543,8 +512,7 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTok
       next();
     } else {
       // The user is not authenticated. Return a 401 Unauthorized response.
-      res.status(401).json({ error: 'Unauthorized' });
+      res.status(401).json({ error: 'Unauthorized.' });
     }
   }
 }
-

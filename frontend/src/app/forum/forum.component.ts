@@ -10,10 +10,7 @@ import { Post } from '../post';
   styleUrls: ['./forum.component.css']
 })
 export class ForumComponent {
-
-  // Create list of all posts.
   posts: Post[];
-  likedPosts: Post[];
 
   showAddBox = false;
 
@@ -29,7 +26,6 @@ export class ForumComponent {
   constructor(private backend: BackendService, private cookieService: CookieService, private router: Router) {
     this.content = "";
     this.posts = [];
-    this.likedPosts = [];
   }
 
   /**
@@ -38,8 +34,8 @@ export class ForumComponent {
   ngOnInit(): void {
     this.loggedinUser = this.cookieService.get('username');
     this.getPosts();
-    this.getLikedPosts();  // #TODO KIRRA FORFEN
-    this.mapPosts();
+    // this.getLikedPosts();
+    // this.mapPosts();
   }
 
   /**
@@ -52,62 +48,51 @@ export class ForumComponent {
       (response) => {
         this.posts = response.body;
       },
-      (error) => {
-        console.log(error);
+      (exception) => {
+        console.log(exception.error);
         this.router.navigate(['']);
       }
     );
-    //In this example, the second argument is an error handling function that logs the error to the console. You can replace console.log(error) with your desired error handling code.
-    //this.backend.getPosts().subscribe((response) => {
-    //  this.posts = response.body;
-      // TODO Implement error handling? See the original code below.
-    //});
-    // this.backend.getPosts()
-    // .then((posts) => {
-    //   console.log(posts);
-    //   // this.posts = posts;
-    // })
-    // .catch((error) => console.error(`An error occurred getting all posts: ${error}`));
   }
 
-  /**
-   * Get the users liked post.
-   */
-  getLikedPosts(){
-    // Get liked posts.
-    this.backend.getLikedPosts().subscribe(
-      (response) => {
-        this.likedPosts = response.body;
-      },
-      (error) => {
-        console.log(error);
-      }
-    );
-  }
+  // /**
+  //  * Get the users liked post.
+  //  */
+  // getLikedPosts(){
+  //   // Get liked posts.
+  //   this.backend.getLikedPosts().subscribe(
+  //     (response) => {
+  //       this.likedPosts = response.body;
+  //     },
+  //     (error) => {
+  //       console.log(error);
+  //     }
+  //   );
+  // }
 
-  /**
-   * Flag if post is liked or not.
-   */
-  mapPosts(){
-    this.posts.forEach(post => {
-      // Check if the post is in the likedPosts array
-      if (this.likedPosts.some(likedPost => likedPost.postId === post.postId)) {
-        // Set the `liked` flag to `true`
-        post.likedByUser = true;
-      } else {
-        post.likedByUser = false;
-      }
-    });
-  }
+  // /**
+  //  * Flag if post is liked or not.
+  //  */
+  // mapPosts(){
+  //   this.posts.forEach(post => {
+  //     // Check if the post is in the likedPosts array
+  //     if (this.likedPosts.some(likedPost => likedPost.postId === post.postId)) {
+  //       // Set the `liked` flag to `true`
+  //       post.likedByUser = true;
+  //     } else {
+  //       post.likedByUser = false;
+  //     }
+  //   });
+  // }
 
-  /**
-   * Check if post is liked.
-   * @param post
-   * @returns
-   */
-  isPostLiked(post: Post): boolean {
-    return this.likedPosts.some(likedPost => likedPost.postId === post.postId);
-  }
+  // /**
+  //  * Check if post is liked.
+  //  * @param post
+  //  * @returns
+  //  */
+  // isPostLiked(post: Post): boolean {
+  //   return this.likedPosts.some(likedPost => likedPost.postId === post.postId);
+  // }
 
   /**
    * Method for filtering the posts based on the inputted search text.

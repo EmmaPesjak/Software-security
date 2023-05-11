@@ -8,12 +8,25 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTok
   /**
    * Retrieves all posts.
    */
-  app.get('/api/users/:userName/posts', (req, res) => {
-    const userName = req.params.userName;
+  app.get('/api/users/:username/posts', (req, res) => {
+    //const userName = req.params.userName;
 
     // Validates session.
-    if (!req.body.debug && (!sessionIds.has(userName) || req.cookies.ID !== sessionIds.get(userName))) {
+    /*if (!req.body.debug && (!sessionIds.has(userName) || req.cookies.ID !== sessionIds.get(userName))) {
       return res.status(401).json({"error":'No active session.'});
+    }*/
+
+    // Validates session and user.
+    /*const userName = validateRequest(req, res);
+    if (userName == null){
+      res.status(401).json('Unauthorized.');
+      return;
+    }*/
+
+    const validation = validateRequest(req);
+    if (!validation.valid) {
+      res.status(validation.status).json(validation.message);
+      return;
     }
 
     // The SQL query to retrieve all posts..
@@ -38,6 +51,9 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTok
 
     // Executes the prepared statement and returns the result.
     stmt.all(function(err, rows) {
+      // Finalizes the prepared statement to release its resources.
+      stmt.finalize();
+
       if (err) {
         console.error(err.message);
         res.status(500).json('Internal Server Error.');
@@ -46,8 +62,6 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTok
       }
     });
 
-    // Finalizes the prepared statement to release its resources.
-    stmt.finalize();
   });
 
   //* GET
@@ -98,6 +112,7 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTok
   app.post('/api/posts', limiter, [
     body('content').trim().escape()
   ], (req, res) => {
+    console.log("entered post request");
 
     // Catch potential <html> and javascript code.
     const errors = validationResult(req);
@@ -108,8 +123,20 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTok
     // Get validated fields.
     const {content} = req.body;
 
+    // Validates session and user.
+    const validation = validateRequest(req);
+    if (!validation.valid) {
+      res.status(validation.status).json(validation.message);
+      return;
+    }
+
+    const username = validation.username;
+
+    
+    //validateRequest(req, res, );
+
     // Check if csrf-token match.
-    const csrfToken = req.cookies.csrfToken;
+    /*const csrfToken = req.cookies.csrfToken;
     if (req.headers['x-csrf-token'] !== csrfToken) {
       
       return res.status(403).send({ error: 'CSRF token mismatch' });
@@ -123,7 +150,7 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTok
     }
 
     // Retrieve username from token.
-    const username = decoded.username;
+    const username = decoded.username;*/
 
     // Make sure that user exists and connect the post to the userID.
     const sql = `
@@ -152,6 +179,8 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTok
     });
 
     stmt.finalize();
+    
+    console.log("exited post request");
   });
 
   //* POST
@@ -160,11 +189,19 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTok
    */
   app.post('/api/posts/like/:postId', (req, res) => {
     const postId = req.params.postId,
-    userId = req.body.userId,
-    userName = req.body.userName;
+    userId = req.body.userId;
+
+    // Validates session and user.
+    const validation = validateRequest(req);
+    if (!validation.valid) {
+      res.status(validation.status).json(validation.message);
+      return;
+    }
+
+    const username = validation.username;
 
     // Validates session.
-    if (!req.body.debug && (!sessionIds.has(userName) || req.cookies.ID !== sessionIds.get(userName))) {
+    /*if (!req.body.debug && (!sessionIds.has(userName) || req.cookies.ID !== sessionIds.get(userName))) {
       return res.status(401).json('No active session.');
     }
     // Checks if the CSRF token is a match.
@@ -177,7 +214,7 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTok
     decoded = verifyToken(jwtToken);
     if (!decoded){
       return res.status(401).json('Unauthorized.');
-    }
+    }*/ 
 
     const deleteDislike = db.prepare('DELETE FROM dislike WHERE post = ? AND user = ?');
     deleteDislike.bind(postId, userId);
@@ -229,11 +266,19 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTok
    */
   app.post('/api/posts/dislike/:postId', (req, res) => {
     const postId = req.params.postId,
-    userId = req.body.userId,
-    userName = req.body.userName;
+    userId = req.body.userId;
+
+    // Validates session and user.
+    const validation = validateRequest(req);
+    if (!validation.valid) {
+      res.status(validation.status).json(validation.message);
+      return;
+    }
+
+    const username = validation.username;
 
     // Validates session.
-    if (!req.body.debug && (!sessionIds.has(userName) || req.cookies.ID !== sessionIds.get(userName))) {
+    /*if (!req.body.debug && (!sessionIds.has(userName) || req.cookies.ID !== sessionIds.get(userName))) {
       return res.status(401).json('No active session.');
     }
     // Checks if the CSRF token is a match.
@@ -246,7 +291,7 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTok
     decoded = verifyToken(jwtToken);
     if (!decoded){
       return res.status(401).json('Unauthorized.');
-    }
+    }*/
 
     const deleteLike = db.prepare('DELETE FROM like WHERE post = ? AND user = ?');
     deleteLike.bind(postId, userId);
@@ -296,9 +341,10 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTok
   /**
    * Updates the specified post.
    */
-  app.patch('/api/posts/:postId', limiter, 
-  body('content').trim().escape(), 
-  (req, res) => {
+  app.patch('/api/posts/:postId', limiter,[
+      body('content').trim().escape()
+    ], 
+    (req, res) => {
 
     // Catch potential <html> and javascript code.
     const errors = validationResult(req);
@@ -306,12 +352,26 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTok
       return res.status(422).json({ errors: errors.array() });
     }
 
-    const postId = req.params.postId;
+    const postId = req.params.postId,
+    userId = Number(req.cookies.userid);
+
     // Get validated fields.
-    const { user, content } = req.body;
+    //const { username, content } = req.body;
+
+
+    // Validates session and user.
+    const validation = validateRequest(req);
+    if (!validation.valid) {
+      res.status(validation.status).json(validation.message);
+      return;
+    }
+
+    const username = validation.username;
+
+    const content = req.body.content;
 
     // Check if csrf-token match.
-    const csrfToken = req.cookies.csrfToken;
+    /*const csrfToken = req.cookies.csrfToken;
     if (req.headers['x-csrf-token'] !== csrfToken) {
       return res.status(403).send({ error: 'CSRF token mismatch' });
     }
@@ -321,7 +381,7 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTok
     const decoded = verifyToken(jwtToken);
     if (!decoded){
       return res.status(401).send({ error: 'Unauthorized' });
-    }
+    }*/
 
     // The SQL query to update the specified post.
     const sql = 'UPDATE post SET content = ? WHERE postId = ? AND user = ?';
@@ -330,7 +390,7 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTok
     const stmt = db.prepare(sql);
 
     // Binds the parameters to the prepared statement.
-    stmt.bind(content, postId, user);
+    stmt.bind(content, postId, userId);
 
     // Executes the prepared statement and returns the result.
     stmt.run(function(err) {
@@ -355,9 +415,18 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTok
   app.delete('/api/posts/:id', limiter, (req, res) => {
     const postId = req.params.id,
     userId = Number(req.cookies.userid);
+    
+    // Validates session and user.
+    const validation = validateRequest(req);
+    if (!validation.valid) {
+      res.status(validation.status).json(validation.message);
+      return;
+    }
+
+    const username = validation.username;
 
     // Check if csrf-token match.
-    const csrfToken = req.cookies.csrfToken;
+    /*const csrfToken = req.cookies.csrfToken;
     if (req.headers['x-csrf-token'] !== csrfToken) {
       return res.status(403).send({ error: 'CSRF token mismatch' });
     }
@@ -367,7 +436,7 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTok
     const decoded = verifyToken(jwtToken);
     if (!decoded){
       return res.status(401).send({ error: 'Unauthorized' });
-    }
+    }*/
 
     const userSql = 'SELECT user FROM post WHERE postId = ?'
     const userStmt = db.prepare(userSql);
@@ -380,7 +449,7 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTok
       } else {
         const user = row.user;
         // if the user is not admin, nor the owner of the post, return.
-        if (userId !== user && decoded.username !== 'admin'){
+        if (userId !== user && username !== 'admin'){
           return res.status(401).send({ error: 'Unauthorized' });
         }
 
@@ -410,16 +479,30 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTok
     userStmt.finalize();
   });
 
-  // Middleware function to check if the user is authenticated.
-  function requireAuth(req, res, next) {
-    const sessionId = req.cookies.ID; // Assuming the session ID is stored in a cookie called "ID".
 
-    if (sessionId && sessionIds.hasValue(sessionId)) {
-      // The user is authenticated. Allow the request to continue.
-      next();
-    } else {
-      // The user is not authenticated. Return a 401 Unauthorized response.
-      res.status(401).json({ error: 'Unauthorized.' });
-    }
+  // Middleware function to check if the user is authenticated.
+  function validateRequest(req, res) {
+
+    const username = req.body.username || req.params.username || req.cookies.username;
+
+    // Validates session.
+    if (!req.body.debug && (!sessionIds.has(username) || req.cookies.ID !== sessionIds.get(username))) {
+      return { valid: false, status: 401, message: 'No active session.' };
+    } 
+
+    // Checks if the CSRF token is a match.
+    const csrfToken = req.cookies.csrfToken;
+    if (req.headers['x-csrf-token'] !== csrfToken) {
+      return { valid: false, status: 403, message: 'CSRF token mismatch.' };
+    } 
+
+    // Checks if the JWT token is a match.
+    const jwtToken = req.cookies.jwtToken,
+    decoded = verifyToken(jwtToken);
+    if (!decoded) {
+      return { valid: false, status: 401, message: 'Unauthorized.' };
+    } 
+
+    return { valid: true, username: decoded.username };
   }
 }

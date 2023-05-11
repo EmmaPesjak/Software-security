@@ -15,7 +15,7 @@ import { HttpErrorResponse } from "@angular/common/http";
 export class RegisterComponent {
   userId?: number;
   name: string;
-  userName: string;
+  username: string;
   email: string;
   password: string;
   passwordRepeat: string;
@@ -25,7 +25,7 @@ export class RegisterComponent {
   constructor(private backend: BackendService) {
     this.userId = undefined;
     this.name = "";
-    this.userName = "";
+    this.username = "";
     this.email = "";
     this.password = "";
     this.passwordRepeat = "";
@@ -54,7 +54,7 @@ export class RegisterComponent {
     const numbers = /.*[0-9].*/.test(this.password);
     const specialChars = /.*[!@#$%^&*()_+}{"':;?/>.<,].*/.test(this.password);
     const containsName = this.password.toLowerCase().includes(this.name.replace(/\s/g, "").toLowerCase());
-    const containsUserName = this.password.toLowerCase().includes(this.userName.toLowerCase());
+    const containsUserName = this.password.toLowerCase().includes(this.username.toLowerCase());
     const length = this.password.length;
     if (!smallLetters || !bigLetters || !numbers || !specialChars || length < 12 || containsName || containsUserName){
       this.displayMessage("Your password must contain: lowercase letters, uppercase letters, numbers, special symbols, have a minimum length of 12 characters, and cannot include your name or username.");
@@ -66,7 +66,7 @@ export class RegisterComponent {
     addUserPromise = this.backend.addUser({
       userId: this.userId ?? 0,
       name: this.name,
-      userName: this.userName,
+      userName: this.username,
       email: this.email,
       password: this.password
     });
@@ -86,7 +86,7 @@ export class RegisterComponent {
     // Clear user input.
     this.userId = undefined;
     this.name = "";
-    this.userName = "";
+    this.username = "";
     this.email = "";
     this.password = "";
     this.passwordRepeat = "";

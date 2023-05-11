@@ -1,4 +1,4 @@
-module.exports = function(db, app, crypto, createToken, verifyToken, sessionIds, csrfTokens, limiter, userSchema) {
+module.exports = function(db, app, crypto, createToken, verifyToken, sessionIds, csrfTokens, limiter, userSchema, body, validationResult ) {
 
   //* GET
   /**
@@ -63,7 +63,16 @@ module.exports = function(db, app, crypto, createToken, verifyToken, sessionIds,
   /**
    * Logs in the specified user.
    */
-  app.post('/api/users/:userName', limiter, (req, res) => {
+  app.post('/api/users/:userName', limiter, [
+    body('password').trim().escape()
+  ], (req, res) => {
+
+    // Catch potential <html> and javascript code.
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(422).json({ errors: errors.array() });
+    }
+
     const userName = req.params.userName,
     password = req.body.password,
     hashedPassword = sha256(password);
@@ -127,20 +136,30 @@ module.exports = function(db, app, crypto, createToken, verifyToken, sessionIds,
 
   //* POST
   /**
-   * Creates a user.
+   * Creates a user, by first validating userinput against <html> or javascript code.
    */
-  app.post('/api/users', limiter, function (req, res) {
+  app.post('/api/users', limiter, [
+    body('email').trim().escape(),
+    body('password').trim().escape(),
+    body('name').trim().escape(),
+    body('userName').trim().escape()
+  ], function (req, res) {
+
+    // Catch potential <html> and javascript code.
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(422).json({ errors: errors.array() });
+    }
 
     // Validate user input against the Joi schema.
-    const validationResult = userSchema.validate(req.body);
-    if (validationResult.error) {
-      return res.status(400).json({ error: validationResult.error.details[0].message });
+    const validationJoi = userSchema.validate(req.body);
+    if (validationJoi.error) {
+      return res.status(400).json({ error: validationJoi.error.details[0].message });
     }
 
     // Get validated fields from Joi.
-    const { email, password, name, userName } = validationResult.value;
+    const { email, password, name, userName } = validationJoi.value;
 
-    // const {name, userName, email, password} = req.body,
     hashedPassword = sha256(password);
 
     // The SQL query to create a user.

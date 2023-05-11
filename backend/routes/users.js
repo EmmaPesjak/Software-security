@@ -154,7 +154,7 @@ module.exports = function(db, app, crypto, createToken, verifyToken, sessionIds,
     // Validate user input against the Joi schema.
     const validationJoi = userSchema.validate(req.body);
     if (validationJoi.error) {
-      return res.status(400).json({ error: validationJoi.error.details[0].message });
+      return res.status(400).json({ message: validationJoi.error.details[0].message });
     }
 
     // Get validated fields from Joi.
@@ -175,10 +175,9 @@ module.exports = function(db, app, crypto, createToken, verifyToken, sessionIds,
     stmt.get(function(err, row) {
       if (err) {
         if (err.code === 'SQLITE_CONSTRAINT') {
-            res.status(400).json({ message: 'User already exists' });
+          res.status(400).json({ message: 'User already exists' });
         } else {
-            console.error(err.message);
-            res.status(500).json({"error": "Internal Server Error."});
+          res.status(500).json({"error": "Internal Server Error."});
         }
       } else {
         res.status(201).send(row);

@@ -122,6 +122,7 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTok
       return res.status(401).send({ error: 'Unauthorized' });
     }
 
+    // Retrieve username from token.
     const username = decoded.username;
 
     // Make sure that user exists and connect the post to the userID.

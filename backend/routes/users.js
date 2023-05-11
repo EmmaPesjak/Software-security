@@ -97,12 +97,10 @@ module.exports = function(db, app, crypto, createToken, verifyToken, sessionIds,
         // Assigns the user a session ID.
         sessionIds.set(userName, sha256(userName));
 
-        //const token = createToken(userName);
-
-        const options = { // TODO Are there more options we should utilize?
+        const options = { 
           httpOnly: true, // Only the server can access the cookie.
           secure: true,
-          maxAge: 1000 * 60 * 60, // Expires after 1 hour. // TODO How can expiration be handled? E.g., the frontend sends the user to the login page?
+          maxAge: 1000 * 60 * 60, // Expires after 1 hour. 
         }
 
         // Create a CSRF token and send in a cookie.
@@ -110,7 +108,7 @@ module.exports = function(db, app, crypto, createToken, verifyToken, sessionIds,
         var csrfToken = csrfTokens.create(secret);
         res.cookie('csrfToken', csrfToken, {secure: true, maxAge: 1000 * 60 * 60});
 
-        res.cookie('ID', sessionIds.get(userName), options); // TODO Use `token` instead of `sessionIds.get(userName)`.
+        res.cookie('ID', sessionIds.get(userName), options); 
 
         // Create a JWT token and send in a cookie.
         const jwtBearerToken = createToken(userName);
@@ -134,16 +132,6 @@ module.exports = function(db, app, crypto, createToken, verifyToken, sessionIds,
     return hash.digest('hex');
   }
 
-  function generateSalt(length) {
-    return crypto.randomBytes(Math.ceil(length / 2)).toString('hex').slice(0, length);
-  }
-  
-  function hashPassword(password, salt) {
-    const hash = crypto.createHmac('sha256', salt);
-    hash.update(password);
-    return hash.digest('hex');
-  }
-
   //* POST
   /**
    * Creates a user, by first validating userinput against <html> or javascript code.
@@ -163,11 +151,7 @@ module.exports = function(db, app, crypto, createToken, verifyToken, sessionIds,
 
     // Get validated fields.
     const { email, password, name, userName } = req.body;
-
-    //hashedPassword = sha256(password);
-
-    const salt = generateSalt(16);
-    const hashedPassword = hashPassword(password, salt);
+    const hashedPassword = sha256(password);
 
     // The SQL query to create a user.
     const sql = 'INSERT INTO user(username, hashedPassword, name, email) VALUES (?, ?, ?, ?) RETURNING *';
@@ -182,6 +166,7 @@ module.exports = function(db, app, crypto, createToken, verifyToken, sessionIds,
     stmt.get(function(err, row) {
       if (err) {
         if (err.code === 'SQLITE_CONSTRAINT') {
+          console.log(err);
           res.status(400).json({ message: 'User already exists' });
         } else {
           res.status(500).json({"error": "Internal Server Error."});

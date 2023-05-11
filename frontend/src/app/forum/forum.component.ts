@@ -11,16 +11,13 @@ import { Post } from '../post';
 })
 export class ForumComponent {
 
-  // Create list of all posts.
+  // Create lists of all posts and liked posts.
   posts: Post[];
   likedPosts: Post[];
 
   showAddBox = false;
-
   searchText: string = "";
-
   loggedinUser = "";
-
   content: string;
 
   // The ID of the post to be edited.
@@ -43,11 +40,10 @@ export class ForumComponent {
   }
 
   /**
-   * Get the courses for the table element from the backend.
+   * Get the posts for the table element from the backend.
    */
   getPosts() {
-
-    // Get posts. If there was an error, redirect to home.
+    // Get posts. If there is an error, redirect to home.
     this.backend.getPosts().subscribe(
       (response) => {
         this.posts = response.body;
@@ -57,24 +53,12 @@ export class ForumComponent {
         this.router.navigate(['']);
       }
     );
-    //In this example, the second argument is an error handling function that logs the error to the console. You can replace console.log(error) with your desired error handling code.
-    //this.backend.getPosts().subscribe((response) => {
-    //  this.posts = response.body;
-      // TODO Implement error handling? See the original code below.
-    //});
-    // this.backend.getPosts()
-    // .then((posts) => {
-    //   console.log(posts);
-    //   // this.posts = posts;
-    // })
-    // .catch((error) => console.error(`An error occurred getting all posts: ${error}`));
   }
 
   /**
-   * Get the users liked post.
+   * Get the users liked posts from the backend.
    */
   getLikedPosts(){
-    // Get liked posts.
     this.backend.getLikedPosts().subscribe(
       (response) => {
         this.likedPosts = response.body;
@@ -102,8 +86,8 @@ export class ForumComponent {
 
   /**
    * Check if post is liked.
-   * @param post
-   * @returns
+   * @param post is the post.
+   * @returns a boolean stating whether it is liked or not.
    */
   isPostLiked(post: Post): boolean {
     return this.likedPosts.some(likedPost => likedPost.postId === post.postId);
@@ -117,9 +101,11 @@ export class ForumComponent {
     this.searchText = searchValue;
   }
 
-  // #TODO the view only updates the content, but not the other associated info to post. getPost???
+  /**
+   * Updates the list of posts with the new post and updates the page.
+   * @param newPost is the new post.
+   */
   onNewPost(newPost: Post) {
-    // Update the list of posts with the new post
     this.posts.push(newPost);
     this.getPosts();
   }
@@ -148,7 +134,6 @@ export class ForumComponent {
    * Edit a post.
    */
   submitEdit() {
-
     // Find the index of the post being edited using currentPostId.
     const index = this.posts.findIndex(post => post.postId === this.currentPostId);
 
@@ -178,7 +163,6 @@ export class ForumComponent {
   deletePost(post: Post) {
     this.backend.deletePost(post)
       .then(() => {
-
         // Get the index of the post in the array.
         const postIndex = this.posts.findIndex(postInArray => postInArray.postId == post.postId);
 

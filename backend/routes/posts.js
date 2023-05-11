@@ -164,64 +164,67 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTok
    */
   app.post('/api/posts/like/:postId', (req, res) => {
     const postId = req.params.postId,
-    user = req.body.user;
+    userId = req.body.userId,
+    userName = req.body.userName;
 
-    // Check if csrf-token match.
+    // Validates session.
+    if (!req.body.debug && (!sessionIds.has(userName) || req.cookies.ID !== sessionIds.get(userName))) {
+      return res.status(401).json('No active session.');
+    }
+    // Checks if the CSRF token is a match.
     const csrfToken = req.cookies.csrfToken;
     if (req.headers['x-csrf-token'] !== csrfToken) {
-      return res.status(403).send({ error: 'CSRF token mismatch' });
+      return res.status(403).json('CSRF token mismatch.');
     }
-
-    // If the jwtToken in the cookies is the same as the generated one, the user is authorized.
-    const jwtToken = req.cookies.jwtToken;
-    const decoded = verifyToken(jwtToken);
+    // Checks if the JWT token is a match.
+    const jwtToken = req.cookies.jwtToken,
+    decoded = verifyToken(jwtToken);
     if (!decoded){
-      return res.status(401).send({ error: 'Unauthorized' });
+      return res.status(401).json('Unauthorized.');
     }
 
-    const insertLikedQuery = 'INSERT INTO like (post, user) VALUES (?, ?)';
-    const stmtInsert = db.prepare(insertLikedQuery);
+    const deleteDislike = db.prepare('DELETE FROM dislike WHERE post = ? AND user = ?');
+    deleteDislike.bind(postId, userId);
 
-    stmtInsert.bind(postId, user);
+    deleteDislike.run((err) => {
+      if (err) res.status(500).json('Internal Server Error.');
+    });
 
-    stmtInsert.run(function(err) {
-      if (err) {
-        // If there was an error (unique constraint, it is already in the db), unlike the post.
-        const deleteQuery =
-        'DELETE FROM like WHERE user = ? AND post = ?';
-        const stmtDelete = db.prepare(deleteQuery);
-        stmtDelete.bind(user, postId);
-        stmtDelete.run(function(err){
-          if (err) {
-            console.error(err.message);
-            res.status(500).json({"error": "Internal Server Error."});
-          } else {
+    deleteDislike.finalize();
+
+    const selectLike = db.prepare('SELECT d.user FROM like AS d WHERE d.post = ? AND d.user = ?');
+    selectLike.bind(postId, userId);
+
+    selectLike.get((err, row) => {
+      if (err) res.status(500).json('Internal Server Error.');
+      else if (row === undefined) {
+        const insertLike = db.prepare('INSERT INTO like(post, user) VALUES (?, ?)');
+        insertLike.bind(postId, userId);
+
+        insertLike.run((err) => {
+          if (err) res.status(500).json('Internal Server Error.');
+          else {
             res.status(201).send();
           }
         });
-        stmtDelete.finalize();
+
+        insertLike.finalize();
       } else {
-        // Success
-        // If the user has disliked the post earlier, make sure to delete it from that table.
-        // #TODO FIND ANOTHER WAY SO AN ERROR IS NOT SENT????
-        const deleteQuery =
-        'DELETE FROM dislike WHERE user = ? AND post = ?';
-        const stmtDelete = db.prepare(deleteQuery);
-        stmtDelete.bind(user, postId);
-        stmtDelete.run(function(err){
-          if (err) {
-            console.error(err.message);
-            //res.status(500).json({"error": "User had not disliked the post."});
-          } else {
-            res.status(201).send();
+        const deleteLike = db.prepare('DELETE FROM like WHERE post = ? AND user = ?');
+        deleteLike.bind(postId, userId);
+
+        deleteLike.run((err) => {
+          if (err) res.status(500).json('Internal Server Error.');
+          else {
+            res.status(200).send();
           }
         });
-        stmtDelete.finalize();
-        res.sendStatus(200);
-      }
-    })
 
-    stmtInsert.finalize();
+        deleteLike.finalize();
+      }
+    });
+
+    selectLike.finalize();
   });
 
   //* POST
@@ -229,64 +232,68 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTok
    * Dislikes the specified post.
    */
   app.post('/api/posts/dislike/:postId', (req, res) => {
-
     const postId = req.params.postId,
-    user = req.body.user;
+    userId = req.body.userId,
+    userName = req.body.userName;
 
-    // Check if csrf-token match.
+    // Validates session.
+    if (!req.body.debug && (!sessionIds.has(userName) || req.cookies.ID !== sessionIds.get(userName))) {
+      return res.status(401).json('No active session.');
+    }
+    // Checks if the CSRF token is a match.
     const csrfToken = req.cookies.csrfToken;
     if (req.headers['x-csrf-token'] !== csrfToken) {
-      return res.status(403).send({ error: 'CSRF token mismatch' });
+      return res.status(403).json('CSRF token mismatch.');
     }
-
-    // If the jwtToken in the cookies is the same as the generated one, the user is authorized.
-    const jwtToken = req.cookies.jwtToken;
-    const decoded = verifyToken(jwtToken);
+    // Checks if the JWT token is a match.
+    const jwtToken = req.cookies.jwtToken,
+    decoded = verifyToken(jwtToken);
     if (!decoded){
-      return res.status(401).send({ error: 'Unauthorized' });
+      return res.status(401).json('Unauthorized.');
     }
 
-    const insertLikedQuery = 'INSERT INTO dislike (post, user) VALUES (?, ?)';
+    const deleteLike = db.prepare('DELETE FROM like WHERE post = ? AND user = ?');
+    deleteLike.bind(postId, userId);
 
-    const stmtInsert = db.prepare(insertLikedQuery);
-    stmtInsert.bind(postId, user);
+    deleteLike.run((err) => {
+      if (err) res.status(500).json('Internal Server Error.');
+    });
 
-    stmtInsert.run(function(err) {
-      if (err) {
-        const deleteQuery =
-        'DELETE FROM dislike WHERE user = ? AND post = ?';
-        const stmtDelete = db.prepare(deleteQuery);
-        stmtDelete.bind(user, postId);
-        stmtDelete.run(function(err){
-          if (err) {
-            console.error(err.message);
-            res.status(500).json({"error": "Internal Server Error."});
-          } else {
+    deleteLike.finalize();
+
+    const selectDislike = db.prepare('SELECT d.user FROM dislike AS d WHERE d.post = ? AND d.user = ?');
+    selectDislike.bind(postId, userId);
+
+    selectDislike.get((err, row) => {
+      if (err) res.status(500).json('Internal Server Error.');
+      else if (row === undefined) {
+        const insertDislike = db.prepare('INSERT INTO dislike(post, user) VALUES (?, ?)');
+        insertDislike.bind(postId, userId);
+
+        insertDislike.run((err) => {
+          if (err) res.status(500).json('Internal Server Error.');
+          else {
             res.status(201).send();
           }
         });
-        stmtDelete.finalize();
+
+        insertDislike.finalize();
       } else {
-        // Success
-        // If the user has liked the post earlier, make sure to delete it from that table.
-        const deleteQuery =
-        'DELETE FROM like WHERE user = ? AND post = ?';
-        const stmtDelete = db.prepare(deleteQuery);
-        stmtDelete.bind(user, postId);
-        stmtDelete.run(function(err){
-          if (err) {
-            console.error(err.message);
-            //res.status(500).json({"error": "User had not liked the post."});
-          } else {
-            res.status(201).send();
+        const deleteDislike = db.prepare('DELETE FROM dislike WHERE post = ? AND user = ?');
+        deleteDislike.bind(postId, userId);
+
+        deleteDislike.run((err) => {
+          if (err) res.status(500).json('Internal Server Error.');
+          else {
+            res.status(200).send();
           }
         });
-        stmtDelete.finalize();
-        res.sendStatus(200);
-      }
-    })
 
-    stmtInsert.finalize();
+        deleteDislike.finalize();
+      }
+    });
+
+    selectDislike.finalize();
   });
 
   //* PATCH
@@ -405,102 +412,6 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTok
         }
       })
     userStmt.finalize();
-  });
-
-  /**
-   * Deletes the specified like.
-   */
-  app.delete('/api/posts/like/:postId', (req, res) => {
-    const postId = req.params.postId,
-    user = req.body.user;
-
-    // Check if csrf-token match.
-    const csrfToken = req.cookies.csrfToken;
-    if (req.headers['x-csrf-token'] !== csrfToken) {
-      return res.status(403).send({ error: 'CSRF token mismatch' });
-    }
-
-    // If the jwtToken in the cookies is the same as the generated one, the user is authorized.
-    const jwtToken = req.cookies.jwtToken;
-    const decoded = verifyToken(jwtToken);
-    if (!decoded){
-      return res.status(401).send({ error: 'Unauthorized' });
-    }
-
-    // Make sure that user and post exists.
-    const sql = `
-    DELETE FROM like
-    WHERE user = ? AND post = ?
-    AND EXISTS(SELECT userId FROM user WHERE userId = ?)
-    AND EXISTS(SELECT postId FROM post WHERE postId = ?)
-    `;
-
-    const stmt = db.prepare(sql);
-
-    stmt.bind(user, postId, user, postId);
-
-    stmt.run(function(err) {
-      if (err) {
-        console.error(err.message);
-        res.status(500).json({"error": "Internal Server Error."});
-      } else if (this.changes === 0) {
-        res.status(404).send('Like with specified user and post not found');
-      } else {
-        res.status(204).send('Like deleted successfully');
-      }
-    });
-
-    // Finalizes the prepared statement to release its resources.
-    stmt.finalize();
-  });
-
-  /**
-   * Deletes the specified dislike.
-   */
-  app.delete('/api/posts/dislike/:postId', (req, res) => {
-    const postId = req.params.postId,
-    user = req.body.user;
-
-    // Check if csrf-token match.
-    const csrfToken = req.cookies.csrfToken;
-    if (req.headers['x-csrf-token'] !== csrfToken) {
-      return res.status(403).send({ error: 'CSRF token mismatch' });
-    }
-
-    // If the jwtToken in the cookies is the same as the generated one, the user is authorized.
-    const jwtToken = req.cookies.jwtToken;
-    const decoded = verifyToken(jwtToken);
-    if (!decoded){
-      return res.status(401).send({ error: 'Unauthorized' });
-    }
-
-    // Make sure that user and post exists.
-    const sql = `DELETE FROM dislike
-    WHERE user = ? AND post = ?
-    AND EXISTS(SELECT userId FROM user WHERE userId = ?)
-    AND EXISTS(SELECT postId FROM post WHERE postId = ?)
-    `;
-
-    // Prepares the SQL statement.
-    const stmt = db.prepare(sql);
-
-    // Binds the parameters to the prepared statement.
-    stmt.bind(postId, user);
-
-    // Executes the prepared statement and returns the result.
-    stmt.run(function(err) {
-      if (err) {
-        console.error(err.message);
-        res.status(500).json({"error": "Internal Server Error."});
-      } else if (this.changes === 0) {
-        res.status(404).send('Dislike with specified user and post not found');
-      } else {
-        res.status(204).send('Like deleted successfully');
-      }
-    });
-
-    // Finalizes the prepared statement to release its resources.
-    stmt.finalize();
   });
 
   // Middleware function to check if the user is authenticated.

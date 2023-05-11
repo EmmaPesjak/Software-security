@@ -182,8 +182,8 @@ export class ForumComponent {
     this.backend.likePost(post)
     .then(() => {
       this.getPosts();
-    })   // #TODO don't catch error??? the error is most likely that the user hasnt disliked before (see backend code)
-    .catch(error => console.error(`An error occurred when liking the post: ${error.message}`));
+    })
+    .catch((exception) => console.error(`An error occurred when liking the post: ${exception.error}.`));
   }
 
   /**
@@ -194,8 +194,8 @@ export class ForumComponent {
     this.backend.dislikePost(post)
     .then(() => {
       this.getPosts();
-    }) // #TODO don't catch error??? the error is most likely that the user hasnt liked before (see backend code)
-    .catch(error => console.error(`An error occurred when disliking the post: ${error}`));
+    })
+    .catch((exception) => console.error(`An error occurred when disliking the post: ${exception.error}.`));
   }
 
   /**

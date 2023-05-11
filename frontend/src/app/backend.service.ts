@@ -110,17 +110,16 @@ export class BackendService {
    * @returns a Promise that resolves to the liked post.
    */
   likePost(post: Post) {
-    const endpoint = this.API_URL + '/api/posts/like/' + post.postId;
-    const body = {
-      postId: post.postId,
-      user: post.user
-    };
-
-    const options = {
-      withCredentials: true
-    };
-    const responseObservable = this.http.post<Post>(endpoint, body, options);
-    const responsePromise = firstValueFrom(responseObservable);
+    const endpoint = this.API_URL + '/api/posts/like/' + post.postId,
+    body = {
+      userId: post.user,
+      userName: this.cookieService.get('username'),
+    },
+    options = {
+      withCredentials: true,
+    },
+    responseObservable = this.http.post<Post>(endpoint, body, options),
+    responsePromise = firstValueFrom(responseObservable);
     return responsePromise;
   }
 
@@ -130,16 +129,16 @@ export class BackendService {
    * @returns a Promise that resolves to the disliked post.
    */
   dislikePost(post: Post) {
-    const endpoint = this.API_URL + '/api/posts/dislike/' + post.postId;
-    const body = {
-      postId: post.postId,
-      user: post.user
-    };
-    const options = {
-      withCredentials: true
-    };
-    const responseObservable = this.http.post<Post>(endpoint, body, options);
-    const responsePromise = firstValueFrom(responseObservable);
+    const endpoint = this.API_URL + '/api/posts/dislike/' + post.postId,
+    body = {
+      userId: post.user,
+      userName: this.cookieService.get('username'),
+    },
+    options = {
+      withCredentials: true,
+    },
+    responseObservable = this.http.post<Post>(endpoint, body, options),
+    responsePromise = firstValueFrom(responseObservable);
     return responsePromise;
   }
 

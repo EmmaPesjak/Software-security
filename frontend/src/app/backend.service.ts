@@ -14,7 +14,7 @@ import { CookieService } from 'ngx-cookie-service';
  * Class responsible for communication with the backend.
  */
 export class BackendService {
-  readonly API_URL: string = "http://localhost:3000"; // TODO: Correct url here!!!
+  readonly API_URL: string = "https://localhost:3000"; // TODO: Correct url here!!!
 
   constructor(private cookieService: CookieService, private http: HttpClient) {}
 

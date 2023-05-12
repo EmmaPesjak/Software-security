@@ -49,6 +49,17 @@ export class HomeComponent {
       }
       this.message = 'Number of login attempts: ' + parseInt(this.cookieService.get('numberOfLoginAttempts')) + '/5.';
       this.backend.login(this.username, this.password).subscribe((data) => {
+        // Set a timer for logging out the user after 1 hour.
+        setTimeout(() => {
+          this.backend.logout().subscribe((data) => {
+            // Clears the cookies set by the client.
+            this.cookieService.deleteAll('/');
+            this.router.navigate(['/']);
+          }, (exception) => {
+            console.log(exception.error); // TODO Add error handling.
+          });
+        }, 60 * 60 * 1000); // 1 hour in milliseconds
+
         this.cookieService.set('username', data.body.username, undefined, '/'); // TODO Extract the user from `response`, not just the username.
         this.cookieService.set('userid', data.body.userId, undefined, '/');
         this.router.navigate(['/forum']);

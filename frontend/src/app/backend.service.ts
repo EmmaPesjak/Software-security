@@ -23,8 +23,8 @@ export class BackendService {
    * @param userName The user's username.
    * @returns A promise that resolves to a logged in user.
    */
-  login(userName: string, password: string): Observable<any> {
-    const endpoint = this.API_URL + "/api/users/" + userName,
+  login(username: string, password: string): Observable<any> {
+    const endpoint = this.API_URL + "/api/users/" + username,
     body = {
       password: password,
     },
@@ -113,7 +113,7 @@ export class BackendService {
     const endpoint = this.API_URL + '/api/posts/like/' + post.postId,
     body = {
       userId: post.user,
-      userName: this.cookieService.get('username'),
+      username: this.cookieService.get('username'),
     },
     options = {
       withCredentials: true,
@@ -132,7 +132,7 @@ export class BackendService {
     const endpoint = this.API_URL + '/api/posts/dislike/' + post.postId,
     body = {
       userId: post.user,
-      userName: this.cookieService.get('username'),
+      username: this.cookieService.get('username'),
     },
     options = {
       withCredentials: true,
@@ -169,11 +169,13 @@ export class BackendService {
     const endpoint = this.API_URL + '/api/posts/' + post.postId;
     const body = {
       content: post.content,
-      user: post.user
+      username: this.cookieService.get('username')
+      //user: post.user
     }
     const options = {
       withCredentials: true
     };
+    
     const responseObservable = this.http.patch<Post>(endpoint, body, options);
     const responsePromise = firstValueFrom(responseObservable);
     return responsePromise;

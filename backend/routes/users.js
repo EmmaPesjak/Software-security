@@ -1,6 +1,5 @@
-module.exports = function(db, app, crypto, createToken, verifyToken, sessionIds, csrfTokens, limiter, userSchema, body, validationResult ) {
+module.exports = function(db, app, crypto, createToken, verifyToken, sessionIds, csrfTokens, limiter, body, validationResult) {
 
-  //* GET
   /**
    * Retrieves all users.
    */
@@ -12,7 +11,7 @@ module.exports = function(db, app, crypto, createToken, verifyToken, sessionIds,
     const stmt = db.prepare(sql);
 
     // Executes the prepared statement and returns the result.
-    stmt.all(function(err, rows) {
+    stmt.all((err, rows) => {
       if (err) {
         console.error(err.message);
         res.status(500).json({"error": "Internal Server Error."});
@@ -25,28 +24,20 @@ module.exports = function(db, app, crypto, createToken, verifyToken, sessionIds,
     stmt.finalize();
   });
 
-  //* GET
   /**
    * Logs out the specified user.
    */
   app.get('/api/users/:userName', (req, res) => {
-    const userName = req.params.userName;
 
-    // Validates session.
-    if (!req.body.debug && (!sessionIds.has(userName) || req.cookies.ID !== sessionIds.get(userName))) {
-      return res.status(401).json('No active session.');
+    // Validates session and user.
+    const validation = validateRequest(req);
+    if (!validation.valid) {
+      res.status(validation.status).json(validation.message);
+      return;
     }
-    // Checks if the CSRF token is a match.
-    const csrfToken = req.cookies.csrfToken;
-    if (req.headers['x-csrf-token'] !== csrfToken) {
-      return res.status(403).json('CSRF token mismatch.');
-    }
-    // Checks if the JWT token is a match.
-    const jwtToken = req.cookies.jwtToken,
-    decoded = verifyToken(jwtToken);
-    if (!decoded){
-      return res.status(401).json('Unauthorized.');
-    }
+
+    // Get username from validation.
+    const userName = validation.username;
 
     // Clears session.
     sessionIds.delete(userName);
@@ -59,7 +50,7 @@ module.exports = function(db, app, crypto, createToken, verifyToken, sessionIds,
     return res.status(200).send();
   });
 
-  //* POST
+  
   /**
    * Logs in the specified user.
    */
@@ -73,6 +64,7 @@ module.exports = function(db, app, crypto, createToken, verifyToken, sessionIds,
       return res.status(422).json({ errors: errors.array() });
     }
 
+    // If valid input, retrieve values and get the hashed-password.
     const userName = req.params.userName,
     password = req.body.password,
     hashedPassword = sha256(password);
@@ -97,26 +89,23 @@ module.exports = function(db, app, crypto, createToken, verifyToken, sessionIds,
         // Assigns the user a session ID.
         sessionIds.set(userName, sha256(userName));
 
-        //const token = createToken(userName);
-
-        const options = { // TODO Are there more options we should utilize?
+        const options = { 
           httpOnly: true, // Only the server can access the cookie.
           secure: true,
-          maxAge: 1000 * 60 * 60, // Expires after 1 hour. // TODO How can expiration be handled? E.g., the frontend sends the user to the login page?
+          maxAge: 1000 * 60 * 60, // Expires after 30 minutes. 
         }
 
         // Create a CSRF token and send in a cookie.
         const secret = csrfTokens.secretSync();
-        var csrfToken = csrfTokens.create(secret);
+        let csrfToken = csrfTokens.create(secret);
         res.cookie('csrfToken', csrfToken, {secure: true, maxAge: 1000 * 60 * 60});
 
-        res.cookie('ID', sessionIds.get(userName), options); // TODO Use `token` instead of `sessionIds.get(userName)`.
+        // Send the session-id in a cookie.
+        res.cookie('ID', sessionIds.get(userName), options); 
 
         // Create a JWT token and send in a cookie.
         const jwtBearerToken = createToken(userName);
         res.cookie("jwtToken", jwtBearerToken, {secure: true, maxAge: 1000 * 60 * 60});
-
-        //res.cookie('token', token, options);
         res.status(200).json(row);
       }
     });
@@ -134,7 +123,6 @@ module.exports = function(db, app, crypto, createToken, verifyToken, sessionIds,
     return hash.digest('hex');
   }
 
-  //* POST
   /**
    * Creates a user, by first validating userinput against <html> or javascript code.
    */
@@ -143,7 +131,7 @@ module.exports = function(db, app, crypto, createToken, verifyToken, sessionIds,
     body('password').trim().escape(),
     body('name').trim().escape(),
     body('userName').trim().escape()
-  ], function (req, res) {
+  ], (req, res) => {
 
     // Catch potential <html> and javascript code.
     const errors = validationResult(req);
@@ -151,16 +139,9 @@ module.exports = function(db, app, crypto, createToken, verifyToken, sessionIds,
       return res.status(422).json({ errors: errors.array() });
     }
 
-    // Validate user input against the Joi schema.
-    const validationJoi = userSchema.validate(req.body);
-    if (validationJoi.error) {
-      return res.status(400).json({ message: validationJoi.error.details[0].message });
-    }
-
-    // Get validated fields from Joi.
-    const { email, password, name, userName } = validationJoi.value;
-
-    hashedPassword = sha256(password);
+    // Get validated fields.
+    const { email, password, name, userName } = req.body;
+    const hashedPassword = sha256(password);
 
     // The SQL query to create a user.
     const sql = 'INSERT INTO user(username, hashedPassword, name, email) VALUES (?, ?, ?, ?) RETURNING *';
@@ -172,9 +153,10 @@ module.exports = function(db, app, crypto, createToken, verifyToken, sessionIds,
     stmt.bind(userName, hashedPassword, name, email);
 
     // Executes the prepared statement and returns the result.
-    stmt.get(function(err, row) {
+    stmt.get((err, row) => {
       if (err) {
         if (err.code === 'SQLITE_CONSTRAINT') {
+          console.log(err);
           res.status(400).json({ message: 'User already exists' });
         } else {
           res.status(500).json({"error": "Internal Server Error."});
@@ -187,4 +169,34 @@ module.exports = function(db, app, crypto, createToken, verifyToken, sessionIds,
     // Finalizes the prepared statement to release its resources.
     stmt.finalize();
   });
+
+  /**
+   * Middleware function to check if the user is authenticated.
+   * @param {*} req 
+   * @param {*} res 
+   * @returns if the user is authenticated and the username. 
+   */
+  function validateRequest(req, res) {
+    const username = req.body.username || req.params.username || req.cookies.username;
+
+    // Validates session.
+    if (!req.body.debug && (!sessionIds.has(username) || req.cookies.ID !== sessionIds.get(username))) {
+      return { valid: false, status: 401, message: 'No active session.' };
+    } 
+
+    // Checks if the CSRF token is a match.
+    const csrfToken = req.cookies.csrfToken;
+    if (req.headers['x-csrf-token'] !== csrfToken) {
+      return { valid: false, status: 403, message: 'CSRF token mismatch.' };
+    } 
+
+    // Checks if the JWT token is a match.
+    const jwtToken = req.cookies.jwtToken,
+    decoded = verifyToken(jwtToken);
+    if (!decoded) {
+      return { valid: false, status: 401, message: 'Unauthorized.' };
+    } 
+
+    return { valid: true, username: decoded.username };
+  }
 }

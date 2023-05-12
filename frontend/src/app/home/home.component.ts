@@ -56,11 +56,10 @@ export class HomeComponent {
             this.cookieService.deleteAll('/');
             this.router.navigate(['/']);
           }, (exception) => {
-            console.log(exception.error); // TODO Add error handling.
+            console.log(exception.error);
           });
         }, 60 * 60 * 1000); // 1 hour in milliseconds
-
-        this.cookieService.set('username', data.body.username, undefined, '/'); // TODO Extract the user from `response`, not just the username.
+        this.cookieService.set('username', data.body.username, undefined, '/');
         this.cookieService.set('userid', data.body.userId, undefined, '/');
         this.router.navigate(['/forum']);
       }, (exception) => {

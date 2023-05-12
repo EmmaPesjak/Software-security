@@ -39,7 +39,7 @@ if (db) {
   // Creates an Express app.
   const app = express();
   // Enables CORS.
-  app.use(cors({origin: 'http://localhost:4200', credentials: true}));
+  app.use(cors({origin: 'https://localhost:4200', credentials: true}));
   // Enables parsing of JSON requests
   // (puts the parsed data in `req.body`).
   app.use(express.json());
@@ -60,9 +60,13 @@ if (db) {
   // The port utilized by the server.
   const port = process.env.PORT || 3000;
   // Starts the server.
-  https
-  .createServer(app)
-  .listen(port, ()=>{
+  https.createServer(
+    {
+      key: fs.readFileSync("../privatekey.key"),
+      cert: fs.readFileSync("../certificate.crt"),
+    },
+    app,
+  ).listen(port, () => {
     console.log(`server is runing at port ${port}.`)
   });
 

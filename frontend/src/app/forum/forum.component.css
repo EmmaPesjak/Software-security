@@ -1,6 +1,7 @@
 .top-container {
     width: 50%;
     text-align: left;
+    margin-bottom: 1.2em;
 }
 
 .forum-post {
@@ -30,7 +31,7 @@
 }
 
 .green {
-    background-color: green;
+    background-color: rgb(99, 124, 120);;
 }
 
 .delete, .edit {
@@ -38,9 +39,17 @@
     margin-bottom: .8em;
 }
 
-.post-btns {
+.post_btns {
     display: flex;
-    flex-direction: row;
+  }
+  
+.btn-group {
+    display: flex;
+    align-items: center;
+  }
+  
+.btn-group p {
+    margin-right: 10px;
 }
 
 .add-box {

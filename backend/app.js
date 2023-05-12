@@ -1,4 +1,6 @@
 // Required modules.
+const https = require("https");
+const fs = require("fs");
 const sqlite3 = require('sqlite3').verbose(),
 express = require('express'),
 cors = require('cors'),
@@ -58,8 +60,10 @@ if (db) {
   // The port utilized by the server.
   const port = process.env.PORT || 3000;
   // Starts the server.
-  app.listen(port, () => {
-    console.log(`The server is running on port ${port}.`);
+  https
+  .createServer(app)
+  .listen(port, ()=>{
+    console.log(`server is runing at port ${port}.`)
   });
 
   const sessionIds = new Map();

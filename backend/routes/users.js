@@ -1,30 +1,6 @@
 module.exports = function(db, app, crypto, createToken, verifyToken, sessionIds, csrfTokens, limiter, body, validationResult) {
 
   /**
-   * Retrieves all users.
-   */
-  app.get('/api/users', (req, res) => {
-    // The SQL query to retrieve all users.
-    const sql = 'SELECT * FROM user';
-
-    // Prepares the SQL statement.
-    const stmt = db.prepare(sql);
-
-    // Executes the prepared statement and returns the result.
-    stmt.all((err, rows) => {
-      if (err) {
-        console.error(err.message);
-        res.status(500).json({"error": "Internal Server Error."});
-      } else {
-        res.status(200).json(rows);
-      }
-    });
-
-    // Finalizes the prepared statement to release its resources.
-    stmt.finalize();
-  });
-
-  /**
    * Logs out the specified user.
    */
   app.get('/api/users/:userName', (req, res) => {

@@ -31,8 +31,6 @@ export class ForumComponent {
   ngOnInit(): void {
     this.loggedinUser = this.cookieService.get('username');
     this.getPosts();
-    // this.getLikedPosts();
-    // this.mapPosts();
   }
 
   /**
@@ -50,45 +48,6 @@ export class ForumComponent {
       }
     );
   }
-
-  // /**
-  //  * Get the users liked post.
-  //  */
-  // getLikedPosts(){
-  //   // Get liked posts.
-  //   this.backend.getLikedPosts().subscribe(
-  //     (response) => {
-  //       this.likedPosts = response.body;
-  //     },
-  //     (error) => {
-  //       console.log(error);
-  //     }
-  //   );
-  // }
-
-  // /**
-  //  * Flag if post is liked or not.
-  //  */
-  // mapPosts(){
-  //   this.posts.forEach(post => {
-  //     // Check if the post is in the likedPosts array
-  //     if (this.likedPosts.some(likedPost => likedPost.postId === post.postId)) {
-  //       // Set the `liked` flag to `true`
-  //       post.likedByUser = true;
-  //     } else {
-  //       post.likedByUser = false;
-  //     }
-  //   });
-  // }
-
-  // /**
-  //  * Check if post is liked.
-  //  * @param post
-  //  * @returns
-  //  */
-  // isPostLiked(post: Post): boolean {
-  //   return this.likedPosts.some(likedPost => likedPost.postId === post.postId);
-  // }
 
   /**
    * Method for filtering the posts based on the inputted search text.

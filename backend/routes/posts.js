@@ -48,48 +48,6 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTok
 
   });
 
-  
-  /**
-   * Retrieves the specified post.   #TODO ANVÄNDS DENNA????????? TA BORT?
-   */
-  app.get('/api/posts/:postId', (req, res) => {
-    const postId = req.params.postId;
-
-    // The SQL query to retrieve the specified post. Join username, likes, and dislikes with post.
-    const sql = `SELECT p.*, u.username, u.name,
-    COUNT(DISTINCT like.user) AS likes,
-    COUNT(DISTINCT dislike.user) AS dislikes
-    FROM post AS p
-    JOIN user AS u ON p.user = u.userId
-    LEFT JOIN like ON p.postId = like.post
-    LEFT JOIN dislike ON p.postId = dislike.post
-    WHERE p.postId = ?
-    GROUP BY p.postId
-    `;
-
-    // Prepares the SQL statement.
-    let stmt = db.prepare(sql);
-
-    // Binds the parameters to the prepared statement.
-    stmt.bind(postId);
-
-    // Executes the prepared statement and returns the result.
-    stmt.get((err, row) => {
-      if (err) {
-        console.error(err.message);
-        res.status(500).json({"error": "Internal Server Error."});
-      } else if (!row) {
-        res.status(404).send('Post not found');
-      } else {
-        res.status(200).json(row);
-      }
-    });
-
-    // Finalizes the prepared statement to release its resources.
-    stmt.finalize();
-  });
-
-
   /**
    * Create a post, by first sanitizing the content. 
    */
@@ -142,7 +100,6 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTok
 
     stmt.finalize();
   });
-
 
   /**
    * Likes the specified post.

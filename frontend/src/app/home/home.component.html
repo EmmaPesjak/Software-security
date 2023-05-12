@@ -2,10 +2,10 @@
   <form>
     <div class="container">
       <label for="uname"><b>Username</b></label>
-      <input name="uname" [(ngModel)]="username" placeholder="Enter Username" type="text" required>
+      <input id="uname" name="uname" [(ngModel)]="username" placeholder="Enter Username" type="text" required>
 
       <label for="psw"><b>Password</b></label>
-      <input name="psw" [(ngModel)]="password" placeholder="Enter Password" type="password" required>
+      <input id="psw" name="psw" [(ngModel)]="password" placeholder="Enter Password" type="password" required>
 
       <p *ngIf="message.length > 0">{{message}}</p>
 

@@ -44,7 +44,7 @@ if (db) {
   app.use(express.urlencoded({extended: true}));
   // Enables parsing of cookies.
   app.use(cookieParser());
-  
+
   // Security headers, against XSS attacks.
   app.use(helmet());
   app.use(bodyParser.json());

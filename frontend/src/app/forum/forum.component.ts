@@ -95,7 +95,7 @@ export class ForumComponent {
 
     // Update the content of the post at that index.
     if (index !== -1) {
-      // Make a shallow copy of the post and with the new content. 
+      // Make a shallow copy of the post and with the new content.
       const updatedPost = { ...this.posts[index], content: this.content };
       // Call the backend service to update the post in the database.
       this.backend.editPost(updatedPost)
@@ -128,7 +128,7 @@ export class ForumComponent {
           return;
         }
 
-        //Remove it from the array.
+        // Remove it from the array.
         this.posts.splice(postIndex, 1);
       })
       .catch(error => console.error(`An error occurred when deleting the post: ${error}`));
@@ -167,7 +167,7 @@ export class ForumComponent {
       this.cookieService.deleteAll('/');
       this.router.navigate(['/']);
     }, (exception) => {
-      console.log(exception.error); // TODO Add error handling.
+      console.log(exception.error);
     });
   }
 }

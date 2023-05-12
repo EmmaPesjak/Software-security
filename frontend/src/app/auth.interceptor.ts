@@ -19,12 +19,12 @@ export class AuthInterceptor implements HttpInterceptor {
   intercept(request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
     const csrfToken = this.cookieService.get("csrfToken");
     const jwtToken = this.cookieService.get("jwtToken");
-    
+
     if (csrfToken && jwtToken) {
       const headers = request.headers
       .set("X-CSRF-Token", csrfToken)
       .set("Authorization", `Bearer ${jwtToken}`);
-    
+
       const cloned = request.clone({
         headers: headers
       });

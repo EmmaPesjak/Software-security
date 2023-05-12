@@ -5,7 +5,7 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTok
    * Retrieve all posts.
    */
   app.get('/api/users/:username/posts', (req, res) => {
-    
+
     // Validate user and session.
     const validation = validateRequest(req);
     if (!validation.valid) {
@@ -49,7 +49,7 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTok
   });
 
   /**
-   * Create a post, by first sanitizing the content. 
+   * Create a post, by first sanitizing the content.
    */
   app.post('/api/posts', limiter, [
     body('content').trim().escape()
@@ -113,7 +113,7 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTok
       return;
     }
 
-    // Retrieve values from param and body. 
+    // Retrieve values from param and body.
     const postId = req.params.postId,
     userId = req.body.userId;
 
@@ -134,7 +134,7 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTok
     selectLike.get((err, row) => {
       if (err) res.status(500).json('Internal Server Error.');
       else if (row === undefined) {
-        // If no result, insert the new like. 
+        // If no result, insert the new like.
         const insertLike = db.prepare('INSERT INTO like(post, user) VALUES (?, ?)');
         insertLike.bind(postId, userId);
 
@@ -147,7 +147,7 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTok
 
         insertLike.finalize();
       } else {
-        // If a "like" was found, delete it to unlike the post. 
+        // If a "like" was found, delete it to unlike the post.
         const deleteLike = db.prepare('DELETE FROM like WHERE post = ? AND user = ?');
         deleteLike.bind(postId, userId);
 
@@ -177,7 +177,7 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTok
       return;
     }
 
-    // Get values onces authenticated. 
+    // Get values onces authenticated.
     const postId = req.params.postId,
     userId = req.body.userId;
 
@@ -199,7 +199,7 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTok
       if (err) res.status(500).json('Internal Server Error.');
       else if (row === undefined) {
 
-        // If no result, insert the new dislike. 
+        // If no result, insert the new dislike.
         const insertDislike = db.prepare('INSERT INTO dislike(post, user) VALUES (?, ?)');
         insertDislike.bind(postId, userId);
 
@@ -212,7 +212,7 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTok
 
         insertDislike.finalize();
       } else {
-        
+
         // If a "dislike" was found, delete it.
         const deleteDislike = db.prepare('DELETE FROM dislike WHERE post = ? AND user = ?');
         deleteDislike.bind(postId, userId);
@@ -236,7 +236,7 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTok
    */
   app.patch('/api/posts/:postId', limiter,[
       body('content').trim().escape()
-    ], 
+    ],
     (req, res) => {
 
     // Catch potential <html> and javascript code.
@@ -251,7 +251,7 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTok
       res.status(validation.status).json(validation.message);
       return;
     }
-    
+
     // Get values once authenticated.
     const postId = req.params.postId,
     userId = Number(req.cookies.userid),
@@ -286,7 +286,7 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTok
    * Deletes the specified post.
    */
   app.delete('/api/posts/:id', limiter, (req, res) => {
-    
+
     // Validates session and user.
     const validation = validateRequest(req);
     if (!validation.valid) {
@@ -343,8 +343,8 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTok
 
   /**
    * Middleware function to check if the user is authenticated.
-   * @param {*} req 
-   * @param {*} res 
+   * @param {*} req
+   * @param {*} res
    * @returns if the user is authenticated and the username.
    */
   function validateRequest(req, res) {
@@ -353,20 +353,20 @@ module.exports = function(db, app, createToken, verifyToken, sessionIds, csrfTok
     // Validates session.
     if (!req.body.debug && (!sessionIds.has(username) || req.cookies.ID !== sessionIds.get(username))) {
       return { valid: false, status: 401, message: 'No active session.' };
-    } 
+    }
 
     // Checks if the CSRF token is a match.
     const csrfToken = req.cookies.csrfToken;
     if (req.headers['x-csrf-token'] !== csrfToken) {
       return { valid: false, status: 403, message: 'CSRF token mismatch.' };
-    } 
+    }
 
     // Checks if the JWT token is a match.
     const jwtToken = req.cookies.jwtToken,
     decoded = verifyToken(jwtToken);
     if (!decoded) {
       return { valid: false, status: 401, message: 'Unauthorized.' };
-    } 
+    }
 
     return { valid: true, username: decoded.username };
   }

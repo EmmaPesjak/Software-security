@@ -175,7 +175,7 @@ export class BackendService {
     const options = {
       withCredentials: true
     };
-    
+
     const responseObservable = this.http.patch<Post>(endpoint, body, options);
     const responsePromise = firstValueFrom(responseObservable);
     return responsePromise;

@@ -26,7 +26,6 @@ module.exports = function(db, app, crypto, createToken, verifyToken, sessionIds,
     return res.status(200).send();
   });
 
-  
   /**
    * Logs in the specified user.
    */
@@ -65,10 +64,10 @@ module.exports = function(db, app, crypto, createToken, verifyToken, sessionIds,
         // Assigns the user a session ID.
         sessionIds.set(userName, sha256(userName));
 
-        const options = { 
+        const options = {
           httpOnly: true, // Only the server can access the cookie.
           secure: true,
-          maxAge: 1000 * 60 * 60, // Expires after 30 minutes. 
+          maxAge: 1000 * 60 * 60, // Expires after 30 minutes.
         }
 
         // Create a CSRF token and send in a cookie.
@@ -77,7 +76,7 @@ module.exports = function(db, app, crypto, createToken, verifyToken, sessionIds,
         res.cookie('csrfToken', csrfToken, {secure: true, maxAge: 1000 * 60 * 60});
 
         // Send the session-id in a cookie.
-        res.cookie('ID', sessionIds.get(userName), options); 
+        res.cookie('ID', sessionIds.get(userName), options);
 
         // Create a JWT token and send in a cookie.
         const jwtBearerToken = createToken(userName);
@@ -148,9 +147,9 @@ module.exports = function(db, app, crypto, createToken, verifyToken, sessionIds,
 
   /**
    * Middleware function to check if the user is authenticated.
-   * @param {*} req 
-   * @param {*} res 
-   * @returns if the user is authenticated and the username. 
+   * @param {*} req
+   * @param {*} res
+   * @returns if the user is authenticated and the username.
    */
   function validateRequest(req, res) {
     const username = req.body.username || req.params.username || req.cookies.username;
@@ -158,20 +157,20 @@ module.exports = function(db, app, crypto, createToken, verifyToken, sessionIds,
     // Validates session.
     if (!req.body.debug && (!sessionIds.has(username) || req.cookies.ID !== sessionIds.get(username))) {
       return { valid: false, status: 401, message: 'No active session.' };
-    } 
+    }
 
     // Checks if the CSRF token is a match.
     const csrfToken = req.cookies.csrfToken;
     if (req.headers['x-csrf-token'] !== csrfToken) {
       return { valid: false, status: 403, message: 'CSRF token mismatch.' };
-    } 
+    }
 
     // Checks if the JWT token is a match.
     const jwtToken = req.cookies.jwtToken,
     decoded = verifyToken(jwtToken);
     if (!decoded) {
       return { valid: false, status: 401, message: 'Unauthorized.' };
-    } 
+    }
 
     return { valid: true, username: decoded.username };
   }

@@ -105,7 +105,7 @@ export class RegisterComponent {
 
     const message: string = error.error.message;
     console.log(error);
-    
+
     // Display the error message.
     this.displayMessage(message);
   }
@@ -119,7 +119,7 @@ export class RegisterComponent {
 
     // Set a timeout that ensures that the message is only displayed for 5 seconds.
     setTimeout(() => {
-      this.message = undefined; 
+      this.message = undefined;
     },
       5000);
   }

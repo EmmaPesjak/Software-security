@@ -8,21 +8,21 @@
 
             <label for="name"><b>Name</b></label>
             <input type="text" class="form-field" [(ngModel)]="name" placeholder="Enter Name" name="name" id="name" required>
-      
+
             <label for="username"><b>Username</b></label>
             <input type="text" class="form-field" [(ngModel)]="username" placeholder="Enter Username" name="username" id="username" required>
-      
-            <label for="psw"><b>Password</b></label> 
+
+            <label for="psw"><b>Password</b></label>
             <div class="popup" (click)="showPwdInfo()">?
                 <span class="popuptext" id="passPopup">Your password must contain:<br>&bull; Lowercase letters<br>&bull; Uppercase letters
-                    <br>&bull; Numbers<br>&bull; Special symbols<br>&bull; Have a minimum length of &nbsp;&nbsp;12 characters<br>&bull; Cannot include your name 
+                    <br>&bull; Numbers<br>&bull; Special symbols<br>&bull; Have a minimum length of &nbsp;&nbsp;12 characters<br>&bull; Cannot include your name
                     &nbsp;&nbsp;or username.</span>
             </div>
             <input type="password" class="form-field" [(ngModel)]="password" placeholder="Enter Password" name="psw" id="psw" required>
-      
+
             <label for="psw-repeat"><b>Repeat Password</b></label>
             <input type="password" class="form-field" [(ngModel)]="passwordRepeat" placeholder="Repeat Password" name="psw-repeat" id="psw-repeat" required>
-      
+
 
             <!-- Call the addUser() method when the user presses the button. -->
             <button type="submit" for="add-user-form" value="Add">Register</button>
@@ -31,7 +31,7 @@
             <p *ngIf="message">{{ message }}</p>
 
         </div>
-      
+
         <div>
             <p>Already have an account? <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Log in</a>.</p>
         </div>

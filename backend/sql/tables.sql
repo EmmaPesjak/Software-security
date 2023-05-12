@@ -1,7 +1,7 @@
 CREATE TABLE "user" (
 	"userId"	INTEGER NOT NULL UNIQUE,
 	"username"	TEXT NOT NULL UNIQUE,
-	"hashedPassword"	TEXT NOT NULL UNIQUE,
+	"hashedPassword"	TEXT NOT NULL,
 	"name"	TEXT NOT NULL,
 	"email"	TEXT NOT NULL UNIQUE,
 	PRIMARY KEY("userId" AUTOINCREMENT)
